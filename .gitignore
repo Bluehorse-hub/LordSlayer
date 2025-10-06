@@ -1,0 +1,47 @@
+# ==========================
+# Unreal Engine 5 (C++ Project) .gitignore
+# Author: Hayamoto Tsuchida
+# Purpose: Safe for public/portfolio upload
+# ==========================
+
+# --- OS / IDE / Build System ---
+.vs/
+.vscode/
+
+# --- Binaries / Intermediate / Derived Data ---
+Binaries/
+Intermediate/
+Saved/
+
+# --- Config cache (keep Default*.ini only) ---
+Config/
+!Config/Default*.ini
+
+# --- Engine-generated files ---
+*.uasset
+*.umap
+*.uexp
+*.ubulk
+*.utoc
+*.pak
+*.sig
+*.sav
+*.tmp
+*.dds
+*.png
+*.jpg
+*.tga
+*.exr
+*.wav
+*.mp3
+*.mp4
+*.mov
+
+# --- Ignore engine and marketplace content ---
+Content/
+Mixamo/
+
+# --- Project-specific folders ---
+Saved/
+Logs/
+DerivedDataCache/
