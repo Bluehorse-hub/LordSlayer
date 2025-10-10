@@ -15,6 +15,7 @@ class BLUEHORSE_API UBluehorseMainMenuScreenWidget : public UBluehorseWidgetBase
 	GENERATED_BODY()
 
 protected:
+
 	FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "TitleScreenWidget")

@@ -15,6 +15,7 @@ FReply UBluehorseMainMenuScreenWidget::NativeOnPreviewKeyDown(const FGeometry& I
 			CurrentIndex += 1;
 			BP_OnHighlightChanged(CurrentIndex, true);
 
+			PlayUISound(MoveSound);
 		}
 	}
 
@@ -25,12 +26,16 @@ FReply UBluehorseMainMenuScreenWidget::NativeOnPreviewKeyDown(const FGeometry& I
 			BP_OnHighlightChanged(CurrentIndex, false);
 			CurrentIndex -= 1;
 			BP_OnHighlightChanged(CurrentIndex, true);
+
+			PlayUISound(MoveSound);
 		}
 	}
 
 	else if (InKeyEvent.GetKey() == EKeys::Gamepad_FaceButton_Bottom)
 	{
 		BP_OnFaceButtonBottom();
+		PlayUISound(DecideSound);
 	}
+
 	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }

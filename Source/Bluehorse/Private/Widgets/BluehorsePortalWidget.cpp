@@ -2,6 +2,7 @@
 
 
 #include "Widgets/BluehorsePortalWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "BluehorseDebugHelper.h"
 
@@ -18,6 +19,7 @@ FReply UBluehorsePortalWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometr
 				CurrentIndex += 1;
 				BP_OnHighlightChanged(CurrentIndex, true);
 
+				PlayUISound(MoveSound);
 			}
 		}
 
@@ -28,12 +30,15 @@ FReply UBluehorsePortalWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometr
 				BP_OnHighlightChanged(CurrentIndex, false);
 				CurrentIndex -= 1;
 				BP_OnHighlightChanged(CurrentIndex, true);
+
+				PlayUISound(MoveSound);
 			}
 		}
 
 		else if (InKeyEvent.GetKey() == EKeys::Gamepad_FaceButton_Bottom)
 		{
 			BP_OnFaceButtonBottom();
+			PlayUISound(DecideSound);
 		}
 	}
 
@@ -44,6 +49,8 @@ FReply UBluehorsePortalWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometr
 			BP_OnFaceButtonTop();
 			IsSelectWidget = true;
 			BP_OnHighlightChanged(CurrentIndex, true);
+
+			PlayUISound(InteractSound);
 		}
 	}
 

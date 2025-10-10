@@ -16,6 +16,10 @@ class BLUEHORSE_API UBluehorsePortalWidget : public UBluehorseWidgetBase
 	GENERATED_BODY()
 
 protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundBase* InteractSound;
+
 	FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "PortalWidget")

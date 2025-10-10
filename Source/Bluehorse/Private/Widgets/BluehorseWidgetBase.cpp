@@ -3,6 +3,7 @@
 
 #include "Widgets/BluehorseWidgetBase.h"
 #include "Interfaces/PawnUIInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 void UBluehorseWidgetBase::NativeOnInitialized()
 {
@@ -14,6 +15,14 @@ void UBluehorseWidgetBase::NativeOnInitialized()
 		{
 			BP_OnOwningHeroUIComponentInitialized(HeroUIComponent);
 		}
+	}
+}
+
+void UBluehorseWidgetBase::PlayUISound(USoundBase* SoundToPlay)
+{
+	if (SoundToPlay)
+	{
+		UGameplayStatics::PlaySound2D(this, SoundToPlay);
 	}
 }
 

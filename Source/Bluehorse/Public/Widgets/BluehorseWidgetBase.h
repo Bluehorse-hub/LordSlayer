@@ -18,6 +18,13 @@ class BLUEHORSE_API UBluehorseWidgetBase : public UUserWidget
 	GENERATED_BODY()
 	
 protected:
+	// --- 入力音の種類 ---
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundBase* MoveSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	USoundBase* DecideSound;
+
 	virtual void NativeOnInitialized() override;
 
 	// これらはBP内で処理を定義するのでcppファイル内に処理は書かない
@@ -26,6 +33,8 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Owning Enemy UI Component Initialized"))
 	void BP_OnOwningEnemyUIComponentInitialized(UEnemyUIComponent* OnOwningEnemyUIComponent);
+
+	void PlayUISound(USoundBase* SoundToPlay);
 
 public:
 	UFUNCTION(BlueprintCallable)
