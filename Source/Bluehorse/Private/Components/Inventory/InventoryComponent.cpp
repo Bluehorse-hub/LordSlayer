@@ -5,6 +5,7 @@
 #include "AbilitySystem/BluehorseAbilitySystemComponent.h"
 #include "DataAssets/Item/ItemData.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -134,6 +135,14 @@ void UInventoryComponent::SelectItem()
 FInventorySlot& UInventoryComponent::GetCurrentItem()
 {
 	return InventorySlots[CurrentInventoryIndex];
+}
+
+void UInventoryComponent::PlayUseItemSound(USoundBase* SoundToPlay)
+{
+	if (SoundToPlay)
+	{
+		UGameplayStatics::PlaySound2D(this, SoundToPlay);
+	}
 }
 
 FInventorySlot* UInventoryComponent::FindSlot(FGameplayTag ItemTag)

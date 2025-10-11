@@ -72,6 +72,9 @@ public:
     UFUNCTION(BlueprintPure, Category = "Inventory")
     FInventorySlot& GetCurrentItem();
 
+    UFUNCTION(BlueprintCallable, Category = "Inventory")
+    void PlayUseItemSound(USoundBase* SoundToPlay);
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
     int MaxInventorySlot = 4;
 
