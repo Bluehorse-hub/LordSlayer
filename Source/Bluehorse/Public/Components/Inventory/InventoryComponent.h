@@ -14,14 +14,6 @@
 class UItemData;
 class UBluehorseAbilitySystemComponent;
 
-UENUM(BlueprintType)
-enum class EItemType : uint8
-{
-    Consumable,
-    Equipment,
-    Material
-};
-
 USTRUCT(BlueprintType)
 struct FInventorySlot
 {
@@ -33,17 +25,11 @@ struct FInventorySlot
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     int32 Count = 0;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    EItemType ItemType;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int32 MaxStack = 99;
-
     UPROPERTY()
     FPrimaryAssetId ItemId;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TObjectPtr<class UItemData> ItemData = nullptr;
+    TObjectPtr<UItemData> ItemData = nullptr;
 };
 
 UCLASS()
@@ -54,11 +40,13 @@ class BLUEHORSE_API UInventoryComponent : public UPawnExtensionComponentBase
 public:
     UInventoryComponent();
 
+    virtual void BeginPlay() override;
+
     UFUNCTION(BlueprintCallable, Category = "Inventory")
     int32 GetItemCount(FGameplayTag ItemTag) const;
 
     UFUNCTION(BlueprintCallable, Category = "Inventory")
-    void AddItem(FGameplayTag ItemTag, int32 Amount, EItemType ItemType, int32 MaxStack, UItemData* ItemData);
+    void AddItem(FGameplayTag ItemTag, int32 Amount, UItemData* ItemData);
 
     UFUNCTION(BlueprintCallable, Category = "Inventory")
     bool UseItemByTag(FGameplayTag ItemTag, UBluehorseAbilitySystemComponent* AbilitySystemComponent, bool& bSlotRemoved);
@@ -70,22 +58,35 @@ public:
     void SelectItem();
 
     UFUNCTION(BlueprintPure, Category = "Inventory")
-    FInventorySlot& GetCurrentItem();
+    FInventorySlot GetCurrentItem();
 
     UFUNCTION(BlueprintCallable, Category = "Inventory")
     void PlayUseItemSound(USoundBase* SoundToPlay);
 
+    UFUNCTION(BlueprintCallable, Category = "Inventory")
+    void SaveInventoryToGameInstance();
+
+    UFUNCTION(BlueprintCallable, Category = "Inventory")
+    void LoadInventoryFromGameInstance();
+
+
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    int MaxInventorySlot = 4;
+    int MaxInventorySlot;
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
     TArray<FInventorySlot> InventorySlots;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory|Data")
+    UDataTable* ItemDataTable;
+
 private:
     FInventorySlot* FindSlot(FGameplayTag ItemTag);
 
     const FInventorySlot* ConstFindSlot(FGameplayTag ItemTag) const;
+
+    UItemData* GetItemDataFromTag(const FGameplayTag& ItemTag) const;
 
     UPROPERTY(EditDefaultsOnly, Category = "Inventory")
     int CurrentInventoryIndex = 0;

@@ -113,6 +113,13 @@ void ABluehorseHeroCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 void ABluehorseHeroCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!InteractDetectionSphere)
+	{
+		UE_LOG(LogTemp, Error, TEXT("InteractDetectionSphere is NULL in BeginPlay for %s!"), *GetName());
+		return;
+	}
+
 	InteractDetectionSphere->OnComponentBeginOverlap.AddDynamic(this, &ABluehorseHeroCharacter::OnInteractableBeginOverlap);
 	InteractDetectionSphere->OnComponentEndOverlap.AddDynamic(this, &ABluehorseHeroCharacter::OnInteractableEndOverlap);
 }

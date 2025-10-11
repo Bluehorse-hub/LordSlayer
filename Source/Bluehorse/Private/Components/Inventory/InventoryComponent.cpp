@@ -6,10 +6,18 @@
 #include "DataAssets/Item/ItemData.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include "BluehorseGameInstance.h"
+
+#include "BluehorseDebugHelper.h"
 
 UInventoryComponent::UInventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UInventoryComponent::BeginPlay()
+{
+	Super::BeginPlay();
 	InventorySlots.SetNum(MaxInventorySlot);
 }
 
@@ -22,13 +30,15 @@ int32 UInventoryComponent::GetItemCount(FGameplayTag ItemTag) const
 	return 0;
 }
 
-void UInventoryComponent::AddItem(FGameplayTag ItemTag, int32 Amount, EItemType ItemType, int32 MaxStack, UItemData* ItemData)
+void UInventoryComponent::AddItem(FGameplayTag ItemTag, int32 Amount, UItemData* ItemData)
 {
+	UE_LOG(LogTemp, Warning, TEXT("[AddItem] InventorySlots.Num() = %d"), InventorySlots.Num());
+
 	if (Amount <= 0) return;
 
 	if (FInventorySlot* Slot = FindSlot(ItemTag))
 	{
-		Slot->Count = FMath::Clamp(Slot->Count + Amount, 0, Slot->MaxStack);
+		Slot->Count = FMath::Clamp(Slot->Count + Amount, 0, ItemData->MaxStack);
 		return;
 	}
 
@@ -38,14 +48,18 @@ void UInventoryComponent::AddItem(FGameplayTag ItemTag, int32 Amount, EItemType 
 		{
 			FInventorySlot NewSlot;
 			NewSlot.ItemTag = ItemTag;
-			NewSlot.ItemType = ItemType;
-			NewSlot.MaxStack = MaxStack;
-			NewSlot.Count = FMath::Clamp(Amount, 0, MaxStack);
+			NewSlot.Count = FMath::Clamp(Amount, 0, ItemData->MaxStack);
 			NewSlot.ItemData = ItemData;
 			NewSlot.ItemId = ItemData->GetPrimaryAssetId();
 
 			Slot = NewSlot;
 			return;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Slot is not empty: Count=%d, ItemData=%s"),
+				Slot.Count,
+				Slot.ItemData ? *Slot.ItemData->GetName() : TEXT("None"));
 		}
 	}
 
@@ -90,9 +104,14 @@ bool UInventoryComponent::UseItemByIndex(UBluehorseAbilitySystemComponent* Abili
 {
 	bSlotRemoved = false;
 
+	if (!InventorySlots.IsValidIndex(CurrentInventoryIndex))
+	{
+		return false;
+	}
+
 	FInventorySlot* Slot = &InventorySlots[CurrentInventoryIndex];
 
-	if (!Slot || Slot->Count <= 0 || !Slot->ItemData)
+	if (Slot->Count <= 0 || !Slot->ItemData)
 	{
 		return false;
 	}
@@ -132,9 +151,14 @@ void UInventoryComponent::SelectItem()
 	}
 }
 
-FInventorySlot& UInventoryComponent::GetCurrentItem()
+FInventorySlot UInventoryComponent::GetCurrentItem()
 {
-	return InventorySlots[CurrentInventoryIndex];
+	if (InventorySlots.IsValidIndex(CurrentInventoryIndex))
+	{
+		return InventorySlots[CurrentInventoryIndex];
+	}
+
+	return FInventorySlot();
 }
 
 void UInventoryComponent::PlayUseItemSound(USoundBase* SoundToPlay)
@@ -142,6 +166,58 @@ void UInventoryComponent::PlayUseItemSound(USoundBase* SoundToPlay)
 	if (SoundToPlay)
 	{
 		UGameplayStatics::PlaySound2D(this, SoundToPlay);
+	}
+}
+
+void UInventoryComponent::SaveInventoryToGameInstance()
+{
+	if (UBluehorseGameInstance* GameInstance = GetWorld()->GetGameInstance<UBluehorseGameInstance>())
+	{
+		// 前回のデータをクリアする
+		GameInstance->PersistentInventory.Empty();
+
+		int Index = 0;
+
+		for (const FInventorySlot& Slot : InventorySlots)
+		{
+			const FGameplayTag& ItemTag = Slot.ItemTag;
+			const int32 Count = Slot.Count;
+
+			FStoredItemData Snapshot;
+			Snapshot.ItemTag = ItemTag;
+			Snapshot.Count = Count;
+			Snapshot.SlotIndex = Index;
+
+			GameInstance->PersistentInventory.Add(Snapshot);
+
+			Index += 1;
+		}
+	}
+}
+
+void UInventoryComponent::LoadInventoryFromGameInstance()
+{
+	if (UBluehorseGameInstance* GameInstance = GetWorld()->GetGameInstance<UBluehorseGameInstance>())
+	{
+		InventorySlots.Empty();
+		InventorySlots.SetNum(MaxInventorySlot);
+
+		for (const FStoredItemData& Data : GameInstance->PersistentInventory)
+		{
+			UItemData* ItemData = GetItemDataFromTag(Data.ItemTag);
+			if (!ItemData)
+			{
+				continue;
+			}
+
+			FInventorySlot NewSlot;
+			NewSlot.ItemData = ItemData;
+			NewSlot.Count = Data.Count;
+			NewSlot.ItemTag = Data.ItemTag;
+			NewSlot.ItemId = ItemData->GetPrimaryAssetId();
+
+			InventorySlots[Data.SlotIndex] = NewSlot;
+		}
 	}
 }
 
@@ -165,6 +241,36 @@ const FInventorySlot* UInventoryComponent::ConstFindSlot(FGameplayTag ItemTag) c
 		if (Slot.ItemTag == ItemTag)
 		{
 			return &Slot;
+		}
+	}
+
+	return nullptr;
+}
+
+UItemData* UInventoryComponent::GetItemDataFromTag(const FGameplayTag& ItemTag) const
+{
+	if (!ItemDataTable)
+	{
+		Debug::Print(TEXT("[Inventory] ItemDataTable is not set!"), FColor::Red);
+		return nullptr;
+	}
+
+	static const FString ContextString(TEXT("Item Lookup"));
+	TArray<FItemDataTableRow*> AllRows;
+	ItemDataTable->GetAllRows(ContextString, AllRows);
+
+	for (FItemDataTableRow* Row : AllRows)
+	{
+		if (Row && Row->ItemTag == ItemTag)
+		{
+			if (Row->ItemData.IsValid())
+			{
+				return Row->ItemData.Get();
+			}
+			else
+			{
+				return Row->ItemData.LoadSynchronous();
+			}
 		}
 	}
 

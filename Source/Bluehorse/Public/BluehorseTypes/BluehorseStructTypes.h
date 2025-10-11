@@ -8,6 +8,7 @@
 class UBluehorseHeroLinkedAnimLayer;
 class UBluehorseGameplayAbility;
 class UInputMappingContext;
+class UItemData;
 
 USTRUCT(BlueprintType)
 struct FBluehorseHeroAbilitySet
@@ -42,4 +43,17 @@ struct FBluehorseHeroWeaponData
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSoftObjectPtr<UTexture2D> SoftWeaponIconTexture;
+};
+
+USTRUCT(BlueprintType)
+struct FItemDataTableRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	FGameplayTag ItemTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TSoftObjectPtr<UItemData> ItemData;
 };

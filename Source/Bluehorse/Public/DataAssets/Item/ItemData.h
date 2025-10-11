@@ -7,6 +7,14 @@
 #include "NiagaraSystem.h"   
 #include "ItemData.generated.h"
 
+UENUM(BlueprintType)
+enum class EItemType : uint8
+{
+	Consumable,
+	Equipment,
+	Material
+};
+
 class UGameplayEffect;
 
 /**
@@ -20,6 +28,12 @@ class BLUEHORSE_API UItemData : public UPrimaryDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FText ItemName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EItemType ItemType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MaxStack = 99;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	TSubclassOf<UGameplayEffect> EffectToApply;

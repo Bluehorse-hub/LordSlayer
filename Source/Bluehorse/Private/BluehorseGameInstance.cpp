@@ -70,3 +70,33 @@ void UBluehorseGameInstance::PlayBGM(USoundBase* NewBGM, float FadeOutTime, floa
         Debug::Print(TEXT("CurrentBGM is NULL"), FColor::Red);
     }
 }
+
+void UBluehorseGameInstance::NotifyLevelTransitionByTag(FGameplayTag NewLevelTag)
+{
+    // èââÒÇÃèÍçá
+    if (!CurrentLevelTag.IsValid())
+    {
+        bHasTransitionedFromOtherLevel = false;
+    }
+    else if (CurrentLevelTag != NewLevelTag)
+    {
+        bHasTransitionedFromOtherLevel = true;
+    }
+    else
+    {
+        bHasTransitionedFromOtherLevel = false;
+    }
+
+    LastLevelTag = CurrentLevelTag;
+    CurrentLevelTag = NewLevelTag;
+
+    UE_LOG(LogTemp, Warning, TEXT("[GameInstance] Level transition: %s to %s (HasTransitioned=%s)"),
+        *LastLevelTag.ToString(),
+        *CurrentLevelTag.ToString(),
+        bHasTransitionedFromOtherLevel ? TEXT("True") : TEXT("False"));
+}
+
+bool UBluehorseGameInstance::HasTransitionedFromOtherLevel() const
+{
+    return bHasTransitionedFromOtherLevel;
+}
