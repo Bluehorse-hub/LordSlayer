@@ -146,14 +146,15 @@ FGameplayTag UBluehorseFunctionLibrary::ComputeHitReactDirectionTag(AActor* InAt
 
 bool UBluehorseFunctionLibrary::IsValidBlock(AActor* InAttacker, AActor* InDefender)
 {
+    // どちらかが無効な場合はデバッグ中にクラッシュ（開発時検出用）
     check(InAttacker && InDefender);
 
+    // 防御者(Defender)の正面ベクトルと、攻撃者(Attacker)の正面ベクトルの内積を取得
+    // DotProduct > 0 : 同じ方向を向いている（背後からの攻撃）
+    // DotProduct < 0 : 反対方向を向いている（正面からの攻撃）
     const float DotResult = FVector::DotProduct(InDefender->GetActorForwardVector(), InAttacker->GetActorForwardVector());
 
-    /*const FString DebugString = FString::Printf(TEXT("Dot Result: %f"), DotResult, DotResult < 0.f ? TEXT("Valid Block") : TEXT("Invalid Block"));
-
-    Debug::Print(DebugString, DotResult < 0.f ? FColor::Green : FColor::Red);*/
-
+    // 正面からの攻撃（DefenderがAttackerに向かっている）場合のみブロック可能とする
     return DotResult < 0.f;
 }
 
@@ -301,5 +302,18 @@ void UBluehorseFunctionLibrary::ToggleInputMode(const UObject* WorldContextObjec
     default:
         break;
     }
+}
+
+bool UBluehorseFunctionLibrary::ApplyGameplayEffectSpecHandleToTargetActor(AActor* InInstigator, AActor* InTargetActor, FGameplayEffectSpecHandle& InSpecHandle)
+{
+    // 両アクターから AbilitySystemComponent を取得
+    UBluehorseAbilitySystemComponent* SourceASC = NativeGetBluehorseASCFromActor(InInstigator);
+    UBluehorseAbilitySystemComponent* TargetASC = NativeGetBluehorseASCFromActor(InTargetActor);
+
+    // GameplayEffectSpec をターゲットに適用
+    FActiveGameplayEffectHandle ActiveGameplayEffectHandle = SourceASC->ApplyGameplayEffectSpecToTarget(*InSpecHandle.Data, TargetASC);
+
+    // 適用が成功したかを返す
+    return ActiveGameplayEffectHandle.WasSuccessfullyApplied();
 }
 

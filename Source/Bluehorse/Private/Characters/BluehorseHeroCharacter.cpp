@@ -48,6 +48,7 @@ ABluehorseHeroCharacter::ABluehorseHeroCharacter()
 	InteractDetectionSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	InteractDetectionSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	InteractDetectionSphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
+	InteractDetectionSphere->ComponentTags.Add(FName(TEXT("IgnoreProjectile")));
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 800.f, 0.f);

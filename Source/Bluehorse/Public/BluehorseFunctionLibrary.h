@@ -59,4 +59,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Bluehorse|FunctionLibrary", meta = (WorldContext = "WorldContextObject"))
 	static void ToggleInputMode(const UObject* WorldContextObject, EBluehorseInputMode InInputMode, UUserWidget* WidgetToFocus = nullptr);
+
+	UFUNCTION(BlueprintCallable, Category = "Bluehorse|FunctionLibrary")
+	static bool ApplyGameplayEffectSpecHandleToTargetActor(AActor* InInstigator, AActor* InTargetActor, FGameplayEffectSpecHandle& InSpecHandle);
 };
