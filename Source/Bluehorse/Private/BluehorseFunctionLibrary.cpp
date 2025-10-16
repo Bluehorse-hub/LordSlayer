@@ -11,6 +11,9 @@
 #include "BluehorseGameplayTags.h"
 #include "BluehorseGameInstance.h"
 #include "Blueprint/UserWidget.h"
+#include "AIController.h"
+#include "GameFramework/Character.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 #include "BluehorseDebugHelper.h"
 
@@ -315,5 +318,32 @@ bool UBluehorseFunctionLibrary::ApplyGameplayEffectSpecHandleToTargetActor(AActo
 
     // 適用が成功したかを返す
     return ActiveGameplayEffectHandle.WasSuccessfullyApplied();
+}
+
+AActor* UBluehorseFunctionLibrary::GetTargetActor(const UObject* WorldContext, FName TargetKeyName)
+{
+    // WorldContext（呼び出し元のProjectileやAbilityなど）から所有者のAIを特定
+    if (!WorldContext) return nullptr;
+
+    UWorld* World = WorldContext->GetWorld();
+    if (!World) return nullptr;
+
+    // --- プレイヤー or 敵AIキャラを取得（今回はAI前提） ---
+    ACharacter* OwnerCharacter = Cast<ACharacter>(WorldContext->GetOuter());
+
+    if (!OwnerCharacter) return nullptr;
+
+    // --- AIControllerを取得 ---
+    AAIController* AIController = Cast<AAIController>(OwnerCharacter->GetController());
+    if (!AIController) return nullptr;
+
+    // --- BlackboardComponentを取得 ---
+    UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+    if (!BlackboardComp) return nullptr;
+
+    // --- Blackboardの "TargetActor" キーから値を取得 ---
+    UObject* TargetObj = BlackboardComp->GetValueAsObject(TargetKeyName);
+
+    return Cast<AActor>(TargetObj);
 }
 

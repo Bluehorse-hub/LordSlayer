@@ -123,6 +123,16 @@ void ABluehorseProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* Ove
 		// すり抜け動作になるように、そのまま終了
 		if (bIsPlayerInvincible)
 		{
+			// 回避成功時は追尾しないようにする
+			if (ProjectileMovementComp)
+			{
+				ProjectileMovementComp->bIsHomingProjectile = false;
+				ProjectileMovementComp->HomingTargetComponent = nullptr;
+
+				// 速度を保ったまま直進させる
+				const FVector CurrentDirection = ProjectileMovementComp->Velocity.GetSafeNormal();
+				ProjectileMovementComp->Velocity = CurrentDirection * ProjectileMovementComp->InitialSpeed;
+			}
 			return;
 		}
 
@@ -137,6 +147,8 @@ void ABluehorseProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* Ove
 		// 敵対関係がある場合のみダメージ適用
 		if (UBluehorseFunctionLibrary::IsTargetPawnHostile(GetInstigator(), HitPawn))
 		{
+			BP_OnSpawnProjectileHitFX(SweepResult.ImpactPoint);
+
 			// Projectileに紐づくGameplayEffectSpecHandleを使ってダメージを適用
 			HandleApplyProjectileDamage(HitPawn, Data);
 

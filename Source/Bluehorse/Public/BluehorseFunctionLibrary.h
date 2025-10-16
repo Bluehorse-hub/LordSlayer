@@ -62,4 +62,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Bluehorse|FunctionLibrary")
 	static bool ApplyGameplayEffectSpecHandleToTargetActor(AActor* InInstigator, AActor* InTargetActor, FGameplayEffectSpecHandle& InSpecHandle);
+
+	UFUNCTION(BlueprintPure, Category = "Bluehorse|FunctionLibrary")
+	static AActor* GetTargetActor(const UObject* WorldContext, FName TargetKeyName);
 };
