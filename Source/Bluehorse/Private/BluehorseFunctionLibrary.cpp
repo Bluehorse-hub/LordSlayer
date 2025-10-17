@@ -320,30 +320,33 @@ bool UBluehorseFunctionLibrary::ApplyGameplayEffectSpecHandleToTargetActor(AActo
     return ActiveGameplayEffectHandle.WasSuccessfullyApplied();
 }
 
-AActor* UBluehorseFunctionLibrary::GetTargetActor(const UObject* WorldContext, FName TargetKeyName)
+TArray<FVector> UBluehorseFunctionLibrary::GetDonutSpawnPositions(const FVector& Center, int32 NumProjectiles, float InnerRadius, float OuterRadius, float HeightOffset)
 {
-    // WorldContext（呼び出し元のProjectileやAbilityなど）から所有者のAIを特定
-    if (!WorldContext) return nullptr;
+    // 出力用配列を宣言
+    TArray<FVector> SpawnPositions;
 
-    UWorld* World = WorldContext->GetWorld();
-    if (!World) return nullptr;
+    // Projectile数分のメモリをあらかじめ確保（再確保を防ぎパフォーマンス向上）
+    SpawnPositions.Reserve(NumProjectiles);
 
-    // --- プレイヤー or 敵AIキャラを取得（今回はAI前提） ---
-    ACharacter* OwnerCharacter = Cast<ACharacter>(WorldContext->GetOuter());
+    // 高さ方向に補正を加えた基準位置（キャラクターの少し上など）
+    const FVector Base = Center + FVector(0, 0, HeightOffset);
 
-    if (!OwnerCharacter) return nullptr;
+    // Projectileの個数分ループ
+    for (int32 i = 0; i < NumProjectiles; ++i)
+    {
+        // 0?360度の範囲でランダムな角度を決定
+        const float Angle = FMath::RandRange(0.f, 2 * PI);
 
-    // --- AIControllerを取得 ---
-    AAIController* AIController = Cast<AAIController>(OwnerCharacter->GetController());
-    if (!AIController) return nullptr;
+        // 内半径?外半径の範囲でランダムな距離を決定
+        const float Radius = FMath::RandRange(InnerRadius, OuterRadius);
 
-    // --- BlackboardComponentを取得 ---
-    UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
-    if (!BlackboardComp) return nullptr;
+        // 角度と距離からオフセット座標を算出（XY平面上のドーナツ座標）
+        FVector Offset = FVector(FMath::Cos(Angle), FMath::Sin(Angle), 0.f) * Radius;
 
-    // --- Blackboardの "TargetActor" キーから値を取得 ---
-    UObject* TargetObj = BlackboardComp->GetValueAsObject(TargetKeyName);
+        // 基準位置（Base）にオフセットを加算して最終的な出現位置を算出
+        SpawnPositions.Add(Base + Offset);
+    }
 
-    return Cast<AActor>(TargetObj);
+    // 全Projectileの出現位置リストを返す
+    return SpawnPositions;
 }
-

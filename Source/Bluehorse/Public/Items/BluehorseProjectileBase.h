@@ -28,9 +28,13 @@ public:
 	// Sets default values for this actor's properties
 	ABluehorseProjectileBase();
 
+	UFUNCTION(BlueprintCallable, Category = "Bluehorse|Projectile")
+	void SetTargetActorFromBBKey(APawn* SourcePawn, FName TargetKeyName);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Destroyed() override;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Projectile")
 	UBoxComponent* ProjectileCollisionBox;
@@ -47,6 +51,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Projectile", meta = (ExposeOnSpawn = "true"))
 	FGameplayEffectSpecHandle ProjectileDamageEffectSpecHandle;
 
+	bool bWasManuallyDestroyed = false;
+
 	UFUNCTION()
 	virtual void OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
@@ -55,6 +61,11 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Spawn Projectile Hit FX"))
 	void BP_OnSpawnProjectileHitFX(const FVector& HitLocation);
+
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Spawn Projectile Expire FX"))
+	void BP_OnSpawnProjectileExpireFX();
+
+	void HandleManualDestroy();
 
 private:
 	void HandleApplyProjectileDamage(APawn* InHitPawn, const FGameplayEventData& InPayload);

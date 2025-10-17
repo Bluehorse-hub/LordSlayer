@@ -8,6 +8,8 @@
 #include "BluehorseFunctionLibrary.h"
 #include "BluehorseGameplayTags.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 #include "BluehorseDebugHelper.h"
 
@@ -17,23 +19,83 @@ ABluehorseProjectileBase::ABluehorseProjectileBase()
 
 	ProjectileCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("ProjectileCollisionBox"));
 	SetRootComponent(ProjectileCollisionBox);
-	ProjectileCollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	ProjectileCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-	ProjectileCollisionBox->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
-	ProjectileCollisionBox->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+	ProjectileCollisionBox->SetCollisionProfileName(TEXT("Projectile"));
+	//ProjectileCollisionBox->SetCollisionObjectType(ECC_GameTraceChannel1);
+	//ProjectileCollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	//ProjectileCollisionBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	//ProjectileCollisionBox->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
+	//ProjectileCollisionBox->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+	//ProjectileCollisionBox->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+	//ProjectileCollisionBox->SetNotifyRigidBodyCollision(false);
 	ProjectileCollisionBox->OnComponentHit.AddUniqueDynamic(this, &ThisClass::OnProjectileHit);
 	ProjectileCollisionBox->OnComponentBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnProjectileBeginOverlap);
+	ProjectileCollisionBox->ComponentTags.Add(FName(TEXT("IgnoreProjectile")));
 
 	ProjectileNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ProjectileNiagaraComponent"));
 	ProjectileNiagaraComponent->SetupAttachment(GetRootComponent());
+	ProjectileNiagaraComponent->ComponentTags.Add(FName(TEXT("IgnoreProjectile")));
 
 	ProjectileMovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComp"));
+	ProjectileMovementComp->ComponentTags.Add(FName(TEXT("IgnoreProjectile")));
 	ProjectileMovementComp->InitialSpeed = 700.f;
 	ProjectileMovementComp->MaxSpeed = 900.f;
 	ProjectileMovementComp->Velocity = FVector(1.f, 0.f, 0.f);
 	ProjectileMovementComp->ProjectileGravityScale = 0.f;
 
 	InitialLifeSpan = 4.f;
+}
+
+void ABluehorseProjectileBase::SetTargetActorFromBBKey(APawn* SourcePawn, FName TargetKeyName)
+{
+	if (!ProjectileMovementComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SetTargetActorFromBBKey: ProjectileMovementComp is null"));
+		return;
+	}
+
+	if (!IsValid(SourcePawn))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SetTargetActorFromBBKey: SourcePawn is invalid"));
+		return;
+	}
+
+	// --- Controller取得（AI or Player どちらでも可） ---
+	AAIController* AIController = Cast<AAIController>(SourcePawn->GetController());
+	if (!AIController)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SetTargetActorFromBBKey: Controller is not AI (%s)"), *SourcePawn->GetName());
+		return;
+	}
+
+	// --- Blackboard取得 ---
+	UBlackboardComponent* BBComp = AIController->GetBlackboardComponent();
+	if (!BBComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SetTargetActorFromBBKey: BlackboardComponent is null (%s)"), *SourcePawn->GetName());
+		return;
+	}
+
+	// --- 指定キーでターゲットを取得 ---
+	UObject* TargetObj = BBComp->GetValueAsObject(TargetKeyName);
+	AActor* TargetActor = Cast<AActor>(TargetObj);
+
+	if (!IsValid(TargetActor))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SetTargetActorFromBBKey: Blackboard Key '%s' is invalid"), *TargetKeyName.ToString());
+		return;
+	}
+
+	// --- ホーミング設定 ---
+	ProjectileMovementComp->HomingTargetComponent = TargetActor->GetRootComponent();
+
+	FString DebugMessage = FString::Printf(
+		TEXT("SetTargetActorFromBBKey: Homing target set to %s via key '%s' (SourcePawn=%s)"),
+		*TargetActor->GetName(),
+		*TargetKeyName.ToString(),
+		*SourcePawn->GetName()
+	);
+
+	//Debug::Print(DebugMessage, FColor::Green);
 }
 
 void ABluehorseProjectileBase::BeginPlay()
@@ -47,8 +109,49 @@ void ABluehorseProjectileBase::BeginPlay()
 	}
 }
 
+void ABluehorseProjectileBase::Destroyed()
+{
+	Super::Destroyed();
+
+	// 自分で破棄した（命中など）なら何もしない
+	if (bWasManuallyDestroyed)
+	{
+		return;
+	}
+
+	// 寿命で消滅した場合のみ実行
+	BP_OnSpawnProjectileExpireFX();
+
+	//Debug::Print(TEXT("Projectile expired naturally after lifespan"), FColor::Green);
+}
+
 void ABluehorseProjectileBase::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	// Projectileが反応してほしくないコンポーネントを無視
+	// これにより、インタラクト用SphereなどのHitを除外できる
+	if (OtherComp && OtherComp->ComponentHasTag(TEXT("IgnoreProjectile")))
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("Ignored projectile overlap with %s (tagged IgnoreProjectile)"), *OtherComp->GetName());
+
+		// --- 停止防止処理 ---
+		if (ProjectileMovementComp)
+		{
+			// ホーミング弾ならターゲットを維持したまま速度再適用
+			if (ProjectileMovementComp->bIsHomingProjectile && ProjectileMovementComp->HomingTargetComponent.IsValid())
+			{
+				const FVector ToTarget = (ProjectileMovementComp->HomingTargetComponent->GetComponentLocation() - GetActorLocation()).GetSafeNormal();
+				ProjectileMovementComp->Velocity = ToTarget * ProjectileMovementComp->InitialSpeed;
+			}
+			else
+			{
+				// 直進弾なら進行方向を維持して速度再適用
+				const FVector ForwardDir = GetActorForwardVector();
+				ProjectileMovementComp->Velocity = ForwardDir * ProjectileMovementComp->InitialSpeed;
+			}
+		}
+
+		return;
+	}
 	// 衝突対象がPawnかどうかを確認
 	APawn* HitPawn = Cast<APawn>(OtherActor);
 
@@ -57,7 +160,7 @@ void ABluehorseProjectileBase::OnProjectileHit(UPrimitiveComponent* HitComponent
 	// 敵対関係にない場合はダメージ処理を行わず終了（味方や無関係オブジェクトへの誤ヒット防止）
 	if (!HitPawn || !UBluehorseFunctionLibrary::IsTargetPawnHostile(GetInstigator(), HitPawn))
 	{
-		Destroy();
+		HandleManualDestroy();
 		return;
 	}
 
@@ -92,18 +195,25 @@ void ABluehorseProjectileBase::OnProjectileHit(UPrimitiveComponent* HitComponent
 	}
 
 	// ヒット後のProjectileを破棄
-	Destroy();
+	HandleManualDestroy();
 }
 
 void ABluehorseProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Overlap: Self=%s (Tags=%s) | Other=%s | OtherComp=%s (Tags=%s)"),
+		*GetName(),
+		*FString::JoinBy(ProjectileCollisionBox->ComponentTags, TEXT(","), [](const FName& Tag) { return Tag.ToString(); }),
+		*OtherActor->GetName(),
+		*OtherComp->GetName(),
+		*FString::JoinBy(OtherComp->ComponentTags, TEXT(","), [](const FName& Tag) { return Tag.ToString(); })
+	);
 	// Projectileが反応してほしくないコンポーネントを無視
 	// これにより、インタラクト用SphereなどのOverlapを除外できる
-	if (OtherComp && OtherComp->ComponentHasTag(TEXT("IgnoreProjectile")))
-	{
-		UE_LOG(LogTemp, Verbose, TEXT("Ignored projectile overlap with %s (tagged IgnoreProjectile)"), *OtherComp->GetName());
-		return;
-	}
+	//if (OtherComp && OtherComp->ComponentHasTag(TEXT("IgnoreProjectile")))
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Ignored projectile overlap with %s (tagged IgnoreProjectile)"), *OtherComp->GetName());
+	//	return;
+	//}
 
 	// 同じアクターに対しては1回だけ処理する
 	if (OverlappedActors.Contains(OtherActor))
@@ -154,9 +264,16 @@ void ABluehorseProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* Ove
 
 			// 命中後にProjectileを破棄
 			// シングルヒット型のProjectileとして破壊
-			Destroy();
+			HandleManualDestroy();
 		}
 	}
+}
+
+void ABluehorseProjectileBase::HandleManualDestroy()
+{
+	// 自然消滅ではなくHitなどで手動で破壊したかどうか
+	bWasManuallyDestroyed = true;
+	Destroy();
 }
 
 void ABluehorseProjectileBase::HandleApplyProjectileDamage(APawn* InHitPawn, const FGameplayEventData& InPayload)
