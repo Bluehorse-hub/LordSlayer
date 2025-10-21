@@ -8,6 +8,8 @@
 
 class ABluehorseEnemyCharacter;
 class UEnemyCombatComponent;
+class ABluehorseAIController;
+class UBlackboardComponent;
 /**
  * 
  */
@@ -21,11 +23,19 @@ public:
 	ABluehorseEnemyCharacter* GetEnemyCharacterFromActorInfo();
 
 	UFUNCTION(BlueprintPure, Category = "Bluehorse|Ability")
+	ABluehorseAIController* GetEnemyAIControllerFromActorInfo() const;
+
+	UFUNCTION(BlueprintPure, Category = "Bluehorse|Ability")
 	UEnemyCombatComponent* GetEnemyCombatComponentFromActorInfo();
 
 	UFUNCTION(BlueprintPure, Category = "Bluehorse|Ability")
 	FGameplayEffectSpecHandle MakeEnemyDamageEffectSpecHandle(TSubclassOf<UGameplayEffect> EffectClass, const FScalableFloat& InDamageScalableFloat);
 
+	UFUNCTION(BlueprintCallable, Category = "Ability|Blackboard")
+	UObject* GetBlackboardValueAsObject(FName KeyName) const;
+
 private:
 	TWeakObjectPtr<ABluehorseEnemyCharacter> CachedBluehorseEnemyCharacter;
+	mutable TWeakObjectPtr<ABluehorseAIController> CachedBluehorseAIController;
+	mutable TWeakObjectPtr<UBlackboardComponent> CachedBlackboardComponent;
 };

@@ -207,13 +207,6 @@ void ABluehorseProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* Ove
 		*OtherComp->GetName(),
 		*FString::JoinBy(OtherComp->ComponentTags, TEXT(","), [](const FName& Tag) { return Tag.ToString(); })
 	);
-	// Projectileが反応してほしくないコンポーネントを無視
-	// これにより、インタラクト用SphereなどのOverlapを除外できる
-	//if (OtherComp && OtherComp->ComponentHasTag(TEXT("IgnoreProjectile")))
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("Ignored projectile overlap with %s (tagged IgnoreProjectile)"), *OtherComp->GetName());
-	//	return;
-	//}
 
 	// 同じアクターに対しては1回だけ処理する
 	if (OverlappedActors.Contains(OtherActor))

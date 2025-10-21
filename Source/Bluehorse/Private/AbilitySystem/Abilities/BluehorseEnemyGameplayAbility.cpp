@@ -5,6 +5,8 @@
 #include "Characters/BluehorseEnemyCharacter.h"
 #include "AbilitySystem/BluehorseAbilitySystemComponent.h"
 #include "BluehorseGameplayTags.h"
+#include "Controllers/BluehorseAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 ABluehorseEnemyCharacter* UBluehorseEnemyGameplayAbility::GetEnemyCharacterFromActorInfo()
 {
@@ -13,6 +15,23 @@ ABluehorseEnemyCharacter* UBluehorseEnemyGameplayAbility::GetEnemyCharacterFromA
         CachedBluehorseEnemyCharacter = Cast<ABluehorseEnemyCharacter>(CurrentActorInfo->AvatarActor);
     }
     return CachedBluehorseEnemyCharacter.IsValid() ? CachedBluehorseEnemyCharacter.Get() : nullptr;
+}
+
+ABluehorseAIController* UBluehorseEnemyGameplayAbility::GetEnemyAIControllerFromActorInfo() const
+{
+    if (!CachedBluehorseAIController.IsValid())
+    {
+        if (CurrentActorInfo)
+        {
+            AActor* Avator = CurrentActorInfo->AvatarActor.Get();
+            if (Avator)
+            {
+                CachedBluehorseAIController = Cast<ABluehorseAIController>(Avator->GetInstigatorController());
+            }
+        }
+    }
+
+    return CachedBluehorseAIController.IsValid() ? CachedBluehorseAIController.Get() : nullptr;
 }
 
 UEnemyCombatComponent* UBluehorseEnemyGameplayAbility::GetEnemyCombatComponentFromActorInfo()
@@ -41,4 +60,18 @@ FGameplayEffectSpecHandle UBluehorseEnemyGameplayAbility::MakeEnemyDamageEffectS
     );
 
     return EffectSpecHandle;
+}
+
+UObject* UBluehorseEnemyGameplayAbility::GetBlackboardValueAsObject(FName KeyName) const
+{
+    if (ABluehorseAIController* AIController = GetEnemyAIControllerFromActorInfo())
+    {
+        UBlackboardComponent* BBComp = AIController->GetBlackboardComponent();
+
+        if (BBComp)
+        {
+            return BBComp->GetValueAsObject(KeyName);
+        }
+    }
+    return nullptr;
 }
