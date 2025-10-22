@@ -99,6 +99,8 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Status_UnderAttack, "Enemy.Status.UnderAttack");
 
 	UE_DEFINE_GAMEPLAY_TAG(Enemy_Event_Knockdown, "Enemy.Event.Knockdown");
+	UE_DEFINE_GAMEPLAY_TAG(Enemy_Event_TurnToTarget_Begin, "Enemy.Event.TurnToTarget.Begin");
+	UE_DEFINE_GAMEPLAY_TAG(Enemy_Event_TurnToTarget_End, "Enemy.Event.TurnToTarget.End");
 
 	//--- Shared Tags ---//
 	UE_DEFINE_GAMEPLAY_TAG(Shared_Ability_HitReact, "Shared.Ability.HitReact");

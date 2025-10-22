@@ -102,6 +102,8 @@ namespace BluehorseGameplayTags
 	BLUEHORSE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Status_UnderAttack);
 
 	BLUEHORSE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Event_Knockdown);
+	BLUEHORSE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Event_TurnToTarget_Begin);
+	BLUEHORSE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Event_TurnToTarget_End);
 
 	//--- Shared Tags ---//
 	BLUEHORSE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Shared_Ability_HitReact);
