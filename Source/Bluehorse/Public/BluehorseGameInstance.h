@@ -22,6 +22,9 @@ struct FBluehorseGameLevelSet
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<USoundBase> BGM;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsCombatArea = false;
+
 	bool IsValid() const
 	{
 		return LevelTag.IsValid() && !Level.IsNull();
@@ -78,11 +81,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	bool HasTransitionedFromOtherLevel() const;
 
+	UFUNCTION(BlueprintPure, Category = "Level")
+	bool IsCurrentLevelCombatArea() const;
+
 	//--- ƒAƒCƒeƒ€ ---//
 	UPROPERTY(BlueprintReadWrite, Category = "Inventory")
 	TArray<FStoredItemData> PersistentInventory;
 
 protected:
+	virtual void Init() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FBluehorseGameLevelSet> GameLevelSets;

@@ -100,3 +100,47 @@ bool UBluehorseGameInstance::HasTransitionedFromOtherLevel() const
 {
     return bHasTransitionedFromOtherLevel;
 }
+
+bool UBluehorseGameInstance::IsCurrentLevelCombatArea() const
+{
+    for (const FBluehorseGameLevelSet& LevelSet : GameLevelSets)
+    {
+        if (LevelSet.LevelTag == CurrentLevelTag)
+        {
+            return LevelSet.bIsCombatArea;
+        }
+    }
+    return false;
+}
+
+void UBluehorseGameInstance::Init()
+{
+    const FString CurrentMapName = UGameplayStatics::GetCurrentLevelName(this, true);
+    FGameplayTag DetectedTag;
+    
+    for (const FBluehorseGameLevelSet& LevelSet : GameLevelSets)
+    {
+        if (LevelSet.Level.IsValid())
+        {
+            FString LevelAssetName = LevelSet.Level.GetAssetName();
+            if (CurrentMapName.Contains(LevelAssetName))
+            {
+                DetectedTag = LevelSet.LevelTag;
+                break;
+            }
+        }
+    }
+
+    if (DetectedTag.IsValid())
+    {
+        CurrentLevelTag = DetectedTag;
+        LastLevelTag = FGameplayTag();
+        bHasTransitionedFromOtherLevel = false;
+
+        UE_LOG(LogTemp, Warning, TEXT("[GameInstance] Initial Map Detected: %s"), *CurrentLevelTag.ToString());
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[GameInstance] No matching LevelTag found for map: %s"), *CurrentMapName);
+    }
+}
