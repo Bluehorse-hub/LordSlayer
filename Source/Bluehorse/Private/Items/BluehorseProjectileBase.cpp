@@ -252,8 +252,31 @@ void ABluehorseProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* Ove
 		{
 			BP_OnSpawnProjectileHitFX(SweepResult.ImpactPoint);
 
+			bool bIsValidBlock = false;
+
+			const bool bIsPlayerBlocking = UBluehorseFunctionLibrary::NativeDoesActorHaveTag(HitPawn, BluehorseGameplayTags::Player_Status_Blocking);
+
+
+			if (bIsPlayerBlocking)
+			{
+				// Projectileの角度や位置などから「有効なブロック」かどうかを判定
+				bIsValidBlock = UBluehorseFunctionLibrary::IsValidBlock(this, HitPawn);
+			}
+
 			// Projectileに紐づくGameplayEffectSpecHandleを使ってダメージを適用
-			HandleApplyProjectileDamage(HitPawn, Data);
+			if (bIsValidBlock)
+			{
+				// ブロックが成立した場合、GASイベントを発火
+				UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
+					HitPawn,
+					BluehorseGameplayTags::Player_Event_SuccessfulBlock,
+					Data
+				);
+			}
+			else
+			{
+				HandleApplyProjectileDamage(HitPawn, Data);
+			}
 
 			// 命中後にProjectileを破棄
 			// シングルヒット型のProjectileとして破壊
