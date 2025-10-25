@@ -68,4 +68,7 @@ public:
 	FORCEINLINE UBluehorseAbilitySystemComponent* GetBluehorseAbilitySystemComponent() const { return BluehorseAbilitySystemComponent;}
 
 	FORCEINLINE UBluehorseAttributeSet* GetBluehorseAttributeSet() const {return BluehorseAttributeSet;}
+
+	FORCEINLINE UMotionWarpingComponent* GetMotionWarpingComponent() const { return MotionWarpingComponent; }
+
 };
