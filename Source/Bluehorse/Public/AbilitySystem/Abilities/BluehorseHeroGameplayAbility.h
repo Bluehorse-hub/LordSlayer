@@ -27,8 +27,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Bluehorse|Ability")
 	UHeroCombatComponent* GetHeroCombatComponentFromActorInfo();
 
-	UFUNCTION(BlueprintPure, Category = "Bluehorse|Ability")
-	FGameplayEffectSpecHandle MakeHeroDamageEffectSpecHandle(TSubclassOf<UGameplayEffect> EffectClass, float InWeaponBaseDamage, FGameplayTag InCurrentAttackTypeTag);
+	UFUNCTION(BlueprintCallable, Category = "Bluehorse|Ability")
+	FGameplayEffectSpecHandle MakeHeroDamageEffectSpecHandle(TSubclassOf<UGameplayEffect> EffectClass, float InWeaponBaseDamage, FGameplayTag InCurrentAttackTypeTag, float MotionValue);
 
 private:
 	TWeakObjectPtr<ABluehorseHeroCharacter> CachedBluehorseHeroCharacter;

@@ -47,6 +47,8 @@ void UGEExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCustom
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetBluehorseDamageCapture().AttackPowerDef, EvaluateParameters, SourceAttackPower);
 
 	float BaseDamage = 0.f;
+	float MotionValue = 1.0f;
+	float AttackTypeMultiplier = 1.0f;
 
 	for (const TPair<FGameplayTag, float>& TagMagnitude : EffectSpec.SetByCallerTagMagnitudes)
 	{
@@ -58,12 +60,16 @@ void UGEExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCustom
 		if (TagMagnitude.Key.MatchesTagExact(BluehorseGameplayTags::Player_SetByCaller_AttackType_Light))
 		{
 			// TODO: LightAttack‚Ì”{—¦ŒvŽZ‚ðl‚¦‚é
+			MotionValue = TagMagnitude.Value;
+			AttackTypeMultiplier = 1.0f;
 			// Debug::Print(TEXT("Light Attack Done"));
 		}
 
 		if (TagMagnitude.Key.MatchesTagExact(BluehorseGameplayTags::Player_SetByCaller_AttackType_Heavy))
 		{
 			// TODO: HeavyAttack‚Ì”{—¦ŒvŽZ‚ðl‚¦‚é
+			MotionValue = TagMagnitude.Value;
+			AttackTypeMultiplier = 1.5f;
 			// Debug::Print(TEXT("Heavy Attack Done"));
 		}
 	}
@@ -71,8 +77,8 @@ void UGEExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCustom
 	float TargetDefensePower = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(GetBluehorseDamageCapture().DefensePowerDef, EvaluateParameters, TargetDefensePower);
 
-	const float FinalDamageDone = BaseDamage * SourceAttackPower / TargetDefensePower;
-	// Debug::Print(TEXT("FinalDamageDone"), FinalDamageDone);
+	const float FinalDamageDone = BaseDamage * SourceAttackPower / TargetDefensePower * AttackTypeMultiplier * MotionValue;
+	Debug::Print(TEXT("FinalDamageDone"), FinalDamageDone);
 
 	if (FinalDamageDone > 0.f)
 	{

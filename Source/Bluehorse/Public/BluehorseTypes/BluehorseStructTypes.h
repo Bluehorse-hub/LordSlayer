@@ -57,3 +57,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TSoftObjectPtr<UItemData> ItemData;
 };
+
+USTRUCT(BlueprintType)
+struct FHeroMotionDataRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float MotionValue = 1.0f;
+};
