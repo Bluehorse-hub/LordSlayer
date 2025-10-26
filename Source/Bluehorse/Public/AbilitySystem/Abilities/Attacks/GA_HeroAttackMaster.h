@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/Abilities/BluehorseHeroGameplayAbility.h"
+#include "BluehorseTypes/BluehorseEnumTypes.h"
 #include "GA_HeroAttackMaster.generated.h"
 
 /**
@@ -33,6 +34,12 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void ComputeAttackDirection();
+
+	UFUNCTION(BlueprintCallable)
+	bool CanPerformFatalAttackByTag(AActor*& OutHitActor, float LineTraceDistance);
+
+	UFUNCTION(BlueprintCallable, meta = (ExpandEnumAsExecs = "Result"))
+	void TryTriggerFatalAttackIfPossible(EBluehorseSuccessType& Result);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> EffectClass;
