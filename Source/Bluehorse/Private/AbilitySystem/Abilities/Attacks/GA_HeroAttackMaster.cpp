@@ -174,7 +174,7 @@ bool UGA_HeroAttackMaster::CanPerformFatalAttackByTag(AActor*& OutHitActor, floa
         ObjectTypes,
         false,
         ActorsToIgnore,
-        EDrawDebugTrace::ForDuration,
+        EDrawDebugTrace::None,
         HitResult,
         true
     );
@@ -195,16 +195,17 @@ bool UGA_HeroAttackMaster::CanPerformFatalAttackByTag(AActor*& OutHitActor, floa
     return false;
 }
 
+// プレイヤーの攻撃時に「致命一撃可能」かを判定し、可能ならイベント送信とWarp位置設定を行う
 void UGA_HeroAttackMaster::TryTriggerFatalAttackIfPossible(EBluehorseSuccessType& Result)
 {
+    // 成功状態を初期化（失敗をデフォルト）
     Result = EBluehorseSuccessType::Failed;
-    UE_LOG(LogTemp, Log, TEXT("[Fatal] TryTriggerFatalAttackIfPossible called."));
 
-
+    // アビリティ実行者（プレイヤーキャラクター）を取得
     ABluehorseHeroCharacter* Hero = GetHeroCharacterFromActorInfo();
     if (!Hero)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[Fatal] Hero reference invalid."));
+        // キャラクターが取得できない場合は処理中断
         return;
     }
 
@@ -212,21 +213,23 @@ void UGA_HeroAttackMaster::TryTriggerFatalAttackIfPossible(EBluehorseSuccessType
     UMotionWarpingComponent* MotionWarpingComp = Hero->GetMotionWarpingComponent();
     if (!MotionWarpingComp)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[Fatal] MotionWarpingComponent not found."));
+        // 取得できない場合はWarp不可のため終了
         return;
     }
 
+    // 致命一撃の判定対象となる敵アクター
     AActor* OutHitActor = nullptr;
+
+    // --- 致命一撃可能判定 ---
+    // 前方200cmの範囲内に「致命一撃可能タグ」を持つ敵がいればtrue
     if (CanPerformFatalAttackByTag(OutHitActor, 200.f))
     {
-        UE_LOG(LogTemp, Log, TEXT("[Fatal] CanPerformFatalAttackByTag returned TRUE. Target: %s"),
-            *GetNameSafe(OutHitActor));
-
-        // GameplayEvent用のデータを作成
+        // 致命一撃可能な敵が見つかった場合
+        // GameplayEventデータを作成して対象の敵に送信
         FGameplayEventData EventData;
-        EventData.Instigator = Hero;
-        EventData.Target = OutHitActor;
-        EventData.EventTag = BluehorseGameplayTags::Shared_Event_Executed;
+        EventData.Instigator = Hero; // 攻撃者（プレイヤー）
+        EventData.Target = OutHitActor; // 対象（敵）
+        EventData.EventTag = BluehorseGameplayTags::Shared_Event_Executed; // イベントタグ（「致命実行」）
 
         // GASイベント送信（BlueprintでのSendGameplayEventToActor相当）
         UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
@@ -234,41 +237,39 @@ void UGA_HeroAttackMaster::TryTriggerFatalAttackIfPossible(EBluehorseSuccessType
             BluehorseGameplayTags::Shared_Event_Executed,
             EventData
         );
-
-        UE_LOG(LogTemp, Log, TEXT("[Fatal] GameplayEvent sent to target: %s"), *GetNameSafe(OutHitActor));
     }
     else
     {
-        UE_LOG(LogTemp, Log, TEXT("[Fatal] Fatal check failed (no target or not valid)."));
+        // 敵がいない、または致命可能でない場合は処理中断
         return;
     }
 
+    // --- Warp位置の算出 ---
+    // 対象の現在位置と向きを取得
     const FVector OutHitActorLocation = OutHitActor->GetActorLocation();
     const FVector OutHitActorFwdVector = OutHitActor->GetActorForwardVector();
 
+    // 敵の正面方向に少し離れた位置をWarp目標にする
     FVector TargetLocation = OutHitActorLocation + OutHitActorFwdVector * FVector(100.f, 100.f, 0.f);
 
+    // プレイヤーを敵の正面に向けるため、前方向を反転して回転値を生成
     const FVector ReversedVector = OutHitActorFwdVector * -1.0f;
     const FRotator TargetRotation = UKismetMathLibrary::MakeRotFromX(ReversedVector);
 
-    UE_LOG(LogTemp, Log, TEXT("[Fatal] Warp TargetLocation: %s, TargetRotation: %s"),
-        *TargetLocation.ToString(), *TargetRotation.ToString());
-
+    // プレイヤーを敵の方向に回転させる
     bool bSetActorRotation = Hero->SetActorRotation(TargetRotation);
 
     if (bSetActorRotation)
     {
-        UE_LOG(LogTemp, Log, TEXT("[Fatal] Hero rotation successfully set to face target."));
-        UE_LOG(LogTemp, Log, TEXT("[Fatal] MotionWarp Target Updated (Name: %s)"),
-            *FatalAttackWarpTargetName.ToString());
-
+        // 回転成功時は、MotionWarpingにWarpターゲットを設定
         MotionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(FatalAttackWarpTargetName, TargetLocation, TargetRotation);
+
+        // 成功フラグを返す（Blueprint上ではSuccessピンにつながる）
         Result = EBluehorseSuccessType::Successful;
-        UE_LOG(LogTemp, Log, TEXT("[Fatal] TryTriggerFatalAttackIfPossible completed SUCCESSFULLY."));
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("[Fatal] Hero rotation could not be set."));
+        // 回転できなかった場合は失敗として終了
         return;
     }
 }
