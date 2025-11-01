@@ -23,13 +23,9 @@ void ABluehorseBonefireInteract::BeginPlay()
 
     if (FireParticleSystem)
     {
-        Debug::Print(TEXT("FireParticleSystem is exist"));
+        //Debug::Print(TEXT("FireParticleSystem is exist"));
         FireParticleComponent->SetTemplate(FireParticleSystem);
         FireParticleComponent->Activate(true);
-    }
-    else
-    {
-        Debug::Print(TEXT("FireParticleSystem is "));
     }
 
     if (FireLoopSound)
