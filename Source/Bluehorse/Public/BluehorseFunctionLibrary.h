@@ -51,9 +51,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Bluehorse|FunctionLibrary")
 	static ERollDirection ComputeRollDirection(AActor* InActor, const FVector& Input, float& OutAngleDifference);
 
-	UFUNCTION(BlueprintCallable, Category = "Bluehorse|FunctionLibrary")
-	static bool CanFatalAttack(AActor* InExecuter, FGameplayTag TagToCheck, AActor*& OutHitActor, float Distance);
-
 	UFUNCTION(BlueprintPure, Category = "Bluehorse|FunctionLibrary", meta = (WorldContext = "WorldContextObject"))
 	static UBluehorseGameInstance* GetBluehorseGameInstance(const UObject* WorldContextObject);
 

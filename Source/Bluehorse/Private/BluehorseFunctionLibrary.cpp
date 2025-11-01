@@ -189,53 +189,6 @@ ERollDirection UBluehorseFunctionLibrary::ComputeRollDirection(AActor* InActor, 
     return ERollDirection::Forward;
 }
 
-bool UBluehorseFunctionLibrary::CanFatalAttack(AActor* InExecuter, FGameplayTag TagToCheck, AActor*& OutHitActor, float Distance)
-{
-    if (!InExecuter) return false;
-
-    UWorld* World = InExecuter->GetWorld();
-
-    if (!World) return false;
-
-    FVector ExecuterLocation = InExecuter->GetActorLocation();
-    FVector ExecuterForward = InExecuter->GetActorForwardVector();
-    FVector TraceEnd = ExecuterLocation + ExecuterForward * Distance;
-
-    TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
-    ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
-
-    TArray<AActor*> ActorsToIgnore;
-    ActorsToIgnore.Add(InExecuter);
-
-    FHitResult HitResult;
-
-    bool bHit = UKismetSystemLibrary::LineTraceSingleForObjects(
-        World,
-        ExecuterLocation,
-        TraceEnd,
-        ObjectTypes,
-        false,
-        ActorsToIgnore,
-        EDrawDebugTrace::ForDuration,
-        HitResult,
-        true
-    );
-
-    if (bHit)
-    {
-        if (AActor* HitActor = HitResult.GetActor())
-        {
-            if (NativeDoesActorHaveTag(HitActor, TagToCheck))
-            {
-                OutHitActor = HitActor;
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
 UBluehorseGameInstance* UBluehorseFunctionLibrary::GetBluehorseGameInstance(const UObject* WorldContextObject)
 {
     
@@ -289,7 +242,7 @@ void UBluehorseFunctionLibrary::ToggleInputMode(const UObject* WorldContextObjec
         UIOnlyMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 
         PlayerController->SetInputMode(UIOnlyMode);
-        PlayerController->bShowMouseCursor = true;
+        PlayerController->bShowMouseCursor = false;
 
         break;
 
