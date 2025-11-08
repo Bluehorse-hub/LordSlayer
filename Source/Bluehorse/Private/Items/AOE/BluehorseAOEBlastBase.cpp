@@ -29,13 +29,7 @@ void ABluehorseAOEBlastBase::SpawnAOESphere_Implementation()
             ENCPoolMethod::AutoRelease,
             true
         );
-
-        UE_LOG(LogTemp, Warning, TEXT("Spawned AOE Blast Niagara effect"));
 	}
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("BlastEffect is null in %s"), *GetName());
-    }
 
     if (SpawnSound)
     {
@@ -51,21 +45,7 @@ void ABluehorseAOEBlastBase::SpawnAOESphere_Implementation()
             nullptr, // Concurrency settings
             true     // Auto destroy
         );
-
-        if (AudioComp)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Spawned AOE Sound: %s"), *SpawnSound->GetName());
-        }
-        else
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Failed to spawn sound component"));
-        }
     }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("SpawnSound is null in %s"), *GetName());
-    }
-
     Destroy();
 }
 

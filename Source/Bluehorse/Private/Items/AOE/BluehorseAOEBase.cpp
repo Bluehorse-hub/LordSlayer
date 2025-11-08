@@ -94,11 +94,5 @@ void ABluehorseAOEBase::HandleApplyAOEDamage(APawn* InHitPawn, const FGameplayEv
 			BluehorseGameplayTags::Shared_Event_HitReact,
 			InPayload
 		);
-
-		UE_LOG(LogTemp, Warning, TEXT("AOE Damage applied to %s"), *InHitPawn->GetActorNameOrLabel());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HandleApplyAOEDamage: bWasApplied is False"));
 	}
 }
