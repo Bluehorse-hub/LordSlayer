@@ -63,13 +63,14 @@ void UBluehorseAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 
 	if (Data.EvaluatedData.Attribute == GetCurrentUltimatePointAttribute())
 	{
-		const float NewCurrentArtsPoint = FMath::Clamp(GetCurrentUltimatePoint(), 0.f, GetMaxUltimatePoint());
+		const float NewCurrentUltimatePoint = FMath::Clamp(GetCurrentUltimatePoint(), 0.f, GetMaxUltimatePoint());
 
-		SetCurrentUltimatePoint(NewCurrentArtsPoint);
+		SetCurrentUltimatePoint(NewCurrentUltimatePoint);
 
 		if (UHeroUIComponent* HeroUIComponent = CachedPawnUIInterface->GetHeroUIComponent())
 		{
-			HeroUIComponent->OnCurrentUltimatePointChanged.Broadcast(GetCurrentUltimatePoint() / GetMaxUltimatePoint());
+			// BarFillStyleにTopToBottomを使用しており溜める系なので更新方法を変更
+			HeroUIComponent->OnCurrentUltimatePointChanged.Broadcast(1.f - (GetCurrentUltimatePoint() / GetMaxUltimatePoint()));
 		}
 	}
 
