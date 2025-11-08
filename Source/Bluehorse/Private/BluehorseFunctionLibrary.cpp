@@ -14,6 +14,9 @@
 #include "AIController.h"
 #include "GameFramework/Character.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "LevelSequencePlayer.h"
+#include "LevelSequenceActor.h"
+#include "DefaultLevelSequenceInstanceData.h"
 
 #include "BluehorseDebugHelper.h"
 
@@ -302,4 +305,77 @@ TArray<FVector> UBluehorseFunctionLibrary::GetDonutSpawnPositions(const FVector&
 
     // 全Projectileの出現位置リストを返す
     return SpawnPositions;
+}
+
+void UBluehorseFunctionLibrary::PlayLevelSequenceAtTransform(const UObject* WorldContextObject, ULevelSequence* SequenceAsset, const FTransform& SpawnTransform, AActor* TargetActorToBind, EBluehorseSuccessType& Execs)
+{
+    // 実行コンテキストの検証
+    if (!WorldContextObject)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[PlayLevelSequenceAtTransform] Invalid WorldContextObject"));
+        Execs = EBluehorseSuccessType::Failed;
+        return;
+    }
+
+    UWorld* World = WorldContextObject->GetWorld();
+    if (!World)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[PlayLevelSequenceAtTransform] World not found"));
+        Execs = EBluehorseSuccessType::Failed;
+        return;
+    }
+
+
+    if (!SequenceAsset)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[PlayLevelSequenceAtTransform] SequenceAsset is null"));
+        Execs = EBluehorseSuccessType::Failed;
+        return;
+    }
+
+    // LevelSequencePlayerの生成
+    FMovieSceneSequencePlaybackSettings PlaybackSettings;
+    PlaybackSettings.bAutoPlay = false;
+
+    ALevelSequenceActor* OutActor = nullptr;
+
+    ULevelSequencePlayer* SequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(
+        World,
+        SequenceAsset,
+        PlaybackSettings,
+        OutActor
+    );
+
+    if (!SequencePlayer || !OutActor)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[PlayLevelSequenceAtTransform] Failed to create LevelSequencePlayer"));
+        Execs = EBluehorseSuccessType::Failed;
+        return;
+    }
+
+    // OverrideInstanceDataを有効化し、SpawnTransformを再生位置として適用する。
+    OutActor->bOverrideInstanceData = true;
+
+    // タグを使って対象ActorをBind（PlayerActorタグはシーケンサー側で設定済み）
+    // シーケンサー上で “PlayerActor” タグを持つActorを、実際のプレイヤーキャラに置き換える
+    // これにより、カットシーン中も実際のキャラクターが参照される
+    OutActor->AddBindingByTag(FName("PlayerActor"), TargetActorToBind, false);
+
+    // Transform Originを設定して、再生時の位置・向きを制御
+    if (UDefaultLevelSequenceInstanceData* DefaultLevelSequenceInstanceData = Cast<UDefaultLevelSequenceInstanceData>(OutActor->DefaultInstanceData))
+    {
+        DefaultLevelSequenceInstanceData->TransformOrigin = SpawnTransform;
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[PlayLevelSequenceAtTransform] Failed to cast"));
+        Execs = EBluehorseSuccessType::Failed;
+        return;
+    }
+
+    // シーケンス再生開始
+    SequencePlayer->Play();
+
+    Execs = EBluehorseSuccessType::Successful;
+    return;
 }

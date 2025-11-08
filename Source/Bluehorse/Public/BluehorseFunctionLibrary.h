@@ -10,6 +10,7 @@
 class UBluehorseAbilitySystemComponent;
 class UPawnCombatComponent;
 class UBluehorseGameInstance;
+class ULevelSequence;
 
 
 /**
@@ -62,4 +63,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Bluehorse|FunctionLibrary")
 	static TArray<FVector> GetDonutSpawnPositions(const FVector& Center, int32 NumProjectiles, float InnerRadius, float OuterRadius, float HeightOffset);
+
+	UFUNCTION(BlueprintCallable, Category = "Bluehorse|FunctionLibrary", meta = (ExpandEnumAsExecs = "Execs", WorldContext = "WorldContextObject"))
+	static void PlayLevelSequenceAtTransform(const UObject* WorldContextObject, ULevelSequence* SequenceAsset, const FTransform& SpawnTransform, AActor* TargetActorToBind, EBluehorseSuccessType& Execs);
 };

@@ -21,7 +21,9 @@ public class Bluehorse : ModuleRules
             "MotionWarping",
             "Niagara",
             "NavigationSystem",
-            "MoviePlayer"
+            "MoviePlayer",
+            "LevelSequence",
+            "MovieScene"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] {  });

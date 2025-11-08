@@ -18,6 +18,7 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_LightAttack_Sword, "InputTag.LightAttack.Sword");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_HeavyAttack_Sword, "InputTag.HeavyAttack.Sword");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Skill, "InputTag.Skill");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_Ultimate, "InputTag.Ultimate");
 
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Interact, "InputTag.Interact");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_UsePotion, "InputTag.UsePotion");
@@ -59,6 +60,7 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Parry, "Player.Ability.Parry");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_MustBeHeld, "Player.Ability.MustBeHeld");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Slash, "Player.Ability.Slash");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Ultimate, "Player.Ability.Ultimate");
 
 	UE_DEFINE_GAMEPLAY_TAG(Player_Weapon_Sword, "Player.Weapon.Sword");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Weapon_Shield, "Player.Weapon.Shield");
