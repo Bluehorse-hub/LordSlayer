@@ -57,9 +57,9 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Roll_NotCombat, "Player.Ability.Roll.NotCombat");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Block, "Player.Ability.Block");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_TargetLock, "Player.Ability.TargetLock");
-	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Parry, "Player.Ability.Parry");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_MustBeHeld, "Player.Ability.MustBeHeld");
-	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Slash, "Player.Ability.Slash");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Skill_Parry, "Player.Ability.Skill.Parry");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Skill_Slash, "Player.Ability.Skill.Slash");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Ultimate, "Player.Ability.Ultimate");
 
 	UE_DEFINE_GAMEPLAY_TAG(Player_Weapon_Sword, "Player.Weapon.Sword");
