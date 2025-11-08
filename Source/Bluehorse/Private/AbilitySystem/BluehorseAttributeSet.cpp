@@ -17,6 +17,8 @@ UBluehorseAttributeSet::UBluehorseAttributeSet()
 	InitMaxHealth(1.f);
 	InitCurrentSkillPoint(1.f);
 	InitMaxSkillPoint(1.f);
+	InitCurrentUltimatePoint(1.f);
+	InitMaxUltimatePoint(1.f);
 	InitCurrentStamina(1.f);
 	InitMaxStamina(1.f);
 	InitAttackPower(1.f);
@@ -56,6 +58,18 @@ void UBluehorseAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 		if (UHeroUIComponent* HeroUIComponent = CachedPawnUIInterface->GetHeroUIComponent())
 		{
 			HeroUIComponent->OnCurrentSkillPointChanged.Broadcast(GetCurrentSkillPoint() / GetMaxSkillPoint());
+		}
+	}
+
+	if (Data.EvaluatedData.Attribute == GetCurrentUltimatePointAttribute())
+	{
+		const float NewCurrentArtsPoint = FMath::Clamp(GetCurrentUltimatePoint(), 0.f, GetMaxUltimatePoint());
+
+		SetCurrentUltimatePoint(NewCurrentArtsPoint);
+
+		if (UHeroUIComponent* HeroUIComponent = CachedPawnUIInterface->GetHeroUIComponent())
+		{
+			HeroUIComponent->OnCurrentUltimatePointChanged.Broadcast(GetCurrentUltimatePoint() / GetMaxUltimatePoint());
 		}
 	}
 

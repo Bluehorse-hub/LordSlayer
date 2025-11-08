@@ -26,6 +26,9 @@ public:
 	FOnPercentChangeDelegate OnCurrentSkillPointChanged; // eƒNƒ‰ƒX‚ÅéŒ¾Ï‚İ‚ÌDelegate
 
 	UPROPERTY(BlueprintAssignable)
+	FOnPercentChangeDelegate OnCurrentUltimatePointChanged;
+
+	UPROPERTY(BlueprintAssignable)
 	FOnPercentChangeDelegate OnCurrentStaminaChanged;
 
 	UPROPERTY(BlueprintCallable, BlueprintAssignable)

@@ -45,6 +45,14 @@ public:
 	FGameplayAttributeData MaxSkillPoint;
 	ATTRIBUTE_ACCESSORS(UBluehorseAttributeSet, MaxSkillPoint)
 
+	UPROPERTY(BlueprintReadOnly, Category = "UltimatePoint")
+	FGameplayAttributeData CurrentUltimatePoint;
+	ATTRIBUTE_ACCESSORS(UBluehorseAttributeSet, CurrentUltimatePoint)
+
+	UPROPERTY(BlueprintReadOnly, Category = "UltimatePoint")
+	FGameplayAttributeData MaxUltimatePoint;
+	ATTRIBUTE_ACCESSORS(UBluehorseAttributeSet, MaxUltimatePoint)
+
 	UPROPERTY(BlueprintReadOnly, Category = "Stamina")
 	FGameplayAttributeData CurrentStamina;
 	ATTRIBUTE_ACCESSORS(UBluehorseAttributeSet, CurrentStamina)
