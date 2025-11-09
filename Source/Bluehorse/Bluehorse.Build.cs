@@ -23,7 +23,8 @@ public class Bluehorse : ModuleRules
             "NavigationSystem",
             "MoviePlayer",
             "LevelSequence",
-            "MovieScene"
+            "MovieScene",
+            "CinematicCamera"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] {  });

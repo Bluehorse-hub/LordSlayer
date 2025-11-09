@@ -61,6 +61,7 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Skill_Parry, "Player.Ability.Skill.Parry");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Skill_Slash, "Player.Ability.Skill.Slash");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Ultimate, "Player.Ability.Ultimate");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Victory, "Player.Ability.Victory");
 
 	UE_DEFINE_GAMEPLAY_TAG(Player_Weapon_Sword, "Player.Weapon.Sword");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Weapon_Shield, "Player.Weapon.Shield");
@@ -76,6 +77,7 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Combo_NextAttack, "Player.Event.Combo.NextAttack");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_SwitchTarget_Left, "Player.Event.SwitchTarget.Left");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_SwitchTarget_Right, "Player.Event.SwitchTarget.Right");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Victory, "Player.Event.Victory");
 
 	UE_DEFINE_GAMEPLAY_TAG(Player_Status_Combat, "Player.Status.Combat");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Status_Rolling, "Player.Status.Rolling");
