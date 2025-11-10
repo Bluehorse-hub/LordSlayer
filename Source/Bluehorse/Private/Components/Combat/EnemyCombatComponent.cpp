@@ -47,7 +47,6 @@ void UEnemyCombatComponent::OnHitTargetActor(AActor* HitActor, const FHitResult&
 
 	if (bIsValidParry)
 	{
-		Debug::Print(TEXT("Valid Parry"), FColor::Green, 1);
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
 			HitActor,
 			BluehorseGameplayTags::Player_Event_SuccessfulParry,
