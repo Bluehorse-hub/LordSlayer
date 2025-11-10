@@ -43,7 +43,8 @@ Gameplay Ability System（GAS）を活用し、攻撃・回避・スタミナ・
 
 ## デモ動画（Demo）
 
-今後公開予定
+2025/11/9時点  
+[デモ動画（Youtube）](https://youtu.be/M72lQCS_8zA?si=htLGCTaQBhBptdsk) 
 
 ## 開発の狙い（Design Philosophy）
 
