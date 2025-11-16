@@ -6,6 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "GameplayTagContainer.h"
 #include "Components/AudioComponent.h"
+#include "MouseBlockerInputProcessor.h"
 #include "BluehorseGameInstance.generated.h"
 
 USTRUCT(BlueprintType)
@@ -85,6 +86,8 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Level")
 	bool IsCurrentLevelCombatArea() const;
+
+	TSharedPtr<IInputProcessor> MouseBlockerRef;
 
 	//--- ƒAƒCƒeƒ€ ---//
 	UPROPERTY(BlueprintReadWrite, Category = "Inventory")

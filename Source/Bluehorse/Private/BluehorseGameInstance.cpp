@@ -5,6 +5,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "MoviePlayer.h"
 
+#include "MouseBlockerInputProcessor.h"
+#include "Framework/Application/SlateApplication.h"
+
 #include "BluehorseDebugHelper.h"
 
 
@@ -165,6 +168,17 @@ void UBluehorseGameInstance::OnDestinationWorldLoaded(UWorld* LoadedWorld)
 void UBluehorseGameInstance::Init()
 {
     Super::Init();
+
+    // MouseBlockerInputProcessor Ç IInputProcessor Ç∆ÇµÇƒàµÇ§
+    TSharedRef<FMouseBlockerInputProcessor> MouseBlocker = MakeShared<FMouseBlockerInputProcessor>();
+
+    // Slate Ç…ìoò^ÅiñﬂÇËílÇÃå^ÇÕ IInputProcessorÅj
+    FSlateApplication::Get().RegisterInputPreProcessor(MouseBlocker, 0);
+
+    // éQè∆Çï€ë∂
+    MouseBlockerRef = MouseBlocker;
+
+    UE_LOG(LogTemp, Warning, TEXT("MouseBlocker registered!"));
 
     FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &ThisClass::OnPreLoadMap);
     FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::OnDestinationWorldLoaded);
