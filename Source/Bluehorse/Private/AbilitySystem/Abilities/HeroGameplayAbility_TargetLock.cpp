@@ -121,8 +121,10 @@ void UHeroGameplayAbility_TargetLock::SwitchTarget(const FGameplayTag& InSwitchD
 	}
 }
 
+// ターゲットロック開始処理
 void UHeroGameplayAbility_TargetLock::TryLockOnTarget()
 {
+	// プレイヤーの周囲からロック可能なアクターを収集する
 	GetAvailableActorsToLock();
 
 	// ターゲットロック対象がいない場合は即座に終了する
@@ -132,12 +134,16 @@ void UHeroGameplayAbility_TargetLock::TryLockOnTarget()
 		return;
 	}
 
+	// ロック可能なアクターの中から「最も近い」ターゲットを選ぶ
 	CurrentLockedActor = GetNearestTargetFromAvailableActors(AvailableActorsToLock);
 
+	// 対象が見つかった場合：ロックオン開始
 	if (CurrentLockedActor)
 	{
+		// まだウィジェットが生成されていなければ作成→Viewport に表示
 		DrawTargetLockWidget();
 
+		// UIを現在の対象位置に合わせる（最初のフレームで正しい位置に表示）
 		SetTargetLockWidgetPosition();
 	}
 	else
@@ -297,54 +303,82 @@ void UHeroGameplayAbility_TargetLock::SetTargetLockWidgetPosition()
 
 }
 
+// ターゲットロック用のInputMappingContextをEnhancedInputに登録する処理
+// このアビリティが有効化されたタイミングで呼ばれ、
+// プレイヤーがロックオン関連の入力を利用できるようにする
 void UHeroGameplayAbility_TargetLock::InitTargetLockMappingContext()
 {
+	// プレイヤーコントローラーを取得し、
+	// そのLocalPlayerからEnhancedInputのSubsystemを取り出す
 	const ULocalPlayer* LocalPlayer = GetHeroControllerFromActorInfo()->GetLocalPlayer();
 
+	// LocalPlayer に紐づく EnhancedInputLocalPlayerSubsystem を取得
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
 
+	// Subsystemがnullの場合は致命的エラーとして停止する
 	check(Subsystem);
 
+	// ターゲットロック用のInputMappingContextを登録
 	Subsystem->AddMappingContext(TargetLockMappingContext, 3);
 }
 
+// ターゲットロックアビリティを外部要因（死亡・対象消失など）で中断させる処理
+// GASのCancelAbility()を安全に呼び出すためのラッパ関数
 void UHeroGameplayAbility_TargetLock::CancelTargetLockAbility()
 {
 	CancelAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), true);
 }
 
+// ターゲットロックアビリティ終了時に呼ばれるクリーンアップ処理
 void UHeroGameplayAbility_TargetLock::CleanUp()
 {
+	// ロック候補リストをクリア。
+	// アビリティごとに再収集されるため、終了時に必ず空にしておく
 	AvailableActorsToLock.Empty();
 
-	// CachedHeroCharacter = nullptr;
-
+	// 現在ロック中のターゲット参照を消す
 	CurrentLockedActor = nullptr;
 
+	// ターゲットロックUI（画面上のターゲットマーカー）を非表示にする
 	if (DrawnTargetLockWidget)
 	{
 		DrawnTargetLockWidget->RemoveFromParent();
 	}
 
+	// Widget のポインタをリセット（次回ロックオン開始時に再生成される）
 	DrawnTargetLockWidget = nullptr;
 
+	// ターゲットロックUIのサイズキャッシュもリセット
 	TargetLockWidgetSize = FVector2D::ZeroVector;
 
+	// キャラ移動速度など、ロックオン専用にキャッシュしていたステータスを初期化
 	CachedDefaultMaxwalkSpeed = 0.f;
 }
 
+// ターゲットロックアビリティ終了時に、
+// Enhanced Input に追加した「ロックオン専用の操作設定」を解除する処理
 void UHeroGameplayAbility_TargetLock::ResetTargetLockMappingContext()
 {
+	// プレイヤーコントローラーが存在しない場合は何もしない
 	if (!GetHeroControllerFromActorInfo())
 	{
 		return;
 	}
 
+	// EnhancedInputはLocalPlayer単位で管理されるため、
+	// PlayerControllerではなくLocalPlayerを取得する必要がある
 	const ULocalPlayer* LocalPlayer = GetHeroControllerFromActorInfo()->GetLocalPlayer();
 
+	// LocalPlayerに紐づくEnhancedInputLocalPlayerSubsystemを取得
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
 
+	// Subsystemが存在しない場合は実行を停止
 	check(Subsystem);
 
+	// ロックオン用のInputMappingContextを解除する
+	// ※ AddMappingContext と完全に対になる処理。
+	//    これを呼ばないと、ロックオンが終わった後も
+	//    ロックオン関連の入力（切替・解除など）が有効なままになり、
+	//    意図しない操作が起きる可能性がある
 	Subsystem->RemoveMappingContext(TargetLockMappingContext);
 }
