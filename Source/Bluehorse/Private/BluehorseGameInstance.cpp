@@ -3,8 +3,10 @@
 
 #include "BluehorseGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "MoviePlayer.h"
 
 #include "BluehorseDebugHelper.h"
+
 
 // 指定されたLevelTagに対応するレベル(World)を取得
 TSoftObjectPtr<UWorld> UBluehorseGameInstance::GetGameLevelByTag(FGameplayTag InTag) const
@@ -132,14 +134,52 @@ bool UBluehorseGameInstance::IsCurrentLevelCombatArea() const
     return false;
 }
 
+// PreLoadMapが呼ばれたときに実行される
+void UBluehorseGameInstance::OnPreLoadMap(const FString& MapName)
+{
+    // ローディング画面用の設定情報を格納する構造体
+    FLoadingScreenAttributes LoadingScreenAttributes;
+
+    // マップロード完了時に、自動でローディング画面を閉じる
+    LoadingScreenAttributes.bAutoCompleteWhenLoadingCompletes = true;
+
+    // ローディング画面を最低2秒は表示する（ロードが速すぎても一瞬で消えないようにする）
+    LoadingScreenAttributes.MinimumLoadingScreenDisplayTime = 2.f;
+
+    // 表示するローディング用ウィジェット
+    // デフォルトで用意されているものを使う
+    LoadingScreenAttributes.WidgetLoadingScreen = FLoadingScreenAttributes::NewTestLoadingScreenWidget();
+
+    // ローディング画面の表示をMoviePlayerに登録
+    GetMoviePlayer()->SetupLoadingScreen(LoadingScreenAttributes);
+}
+
+// 新しいワールドがロード完了したときに呼ばれる
+void UBluehorseGameInstance::OnDestinationWorldLoaded(UWorld* LoadedWorld)
+{
+    // ローディング画面（ムービー含む）を停止する
+    GetMoviePlayer()->StopMovie();
+}
+
 // GameInstance初期化時に現在のマップを解析し、対応するLevelTagを検出
 void UBluehorseGameInstance::Init()
 {
+    Super::Init();
+
+    FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &ThisClass::OnPreLoadMap);
+    FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::OnDestinationWorldLoaded);
+
     // 現在のマップ名を取得
     const FString CurrentMapName = UGameplayStatics::GetCurrentLevelName(this, true);
     FGameplayTag DetectedTag;
-    
-    // GameLevelSetsに登録されたマップと照合
+
+    // ---------------------------------------------------------------
+    // 現在ロードされたマップ名と GameLevelSets に登録された LevelAsset を照合し、
+    // 対応する GameplayTag（LevelTag）を特定する処理。
+    // ※ 現状は GameLevelSets によるマップ管理と、
+    //    ローディング画面/レベル遷移管理が別々に動いているため、
+    //    将来的には本処理もレベル遷移管理へ統合する余地がある。
+    // ---------------------------------------------------------------
     for (const FBluehorseGameLevelSet& LevelSet : GameLevelSets)
     {
         if (LevelSet.Level.IsValid())
@@ -155,7 +195,11 @@ void UBluehorseGameInstance::Init()
         }
     }
 
-    // 一致したタグがあれば現在レベルとして登録
+    // ---------------------------------------------------------------
+    // マッチする LevelTag が見つかった場合は、
+    // "現在のレベルタグ" として登録し、遷移情報を更新。
+    // ※ ここで設定される CurrentLevelTag は、マップロード後の初期化動作に使用可能。
+    // ---------------------------------------------------------------
     if (DetectedTag.IsValid())
     {
         CurrentLevelTag = DetectedTag;

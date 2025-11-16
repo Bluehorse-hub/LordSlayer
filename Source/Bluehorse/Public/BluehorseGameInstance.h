@@ -56,6 +56,8 @@ class BLUEHORSE_API UBluehorseGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
+	virtual void Init() override;
+
 	//--- ƒŒƒxƒ‹ ---//
 	UFUNCTION(BlueprintPure, meta = (GameplayTagFilter = "GameData.Level"))
 	TSoftObjectPtr<UWorld> GetGameLevelByTag(FGameplayTag InTag) const;
@@ -89,7 +91,8 @@ public:
 	TArray<FStoredItemData> PersistentInventory;
 
 protected:
-	virtual void Init() override;
+	virtual void OnPreLoadMap(const FString& MapName);
+	virtual void OnDestinationWorldLoaded(UWorld* LoadedWorld);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TArray<FBluehorseGameLevelSet> GameLevelSets;
