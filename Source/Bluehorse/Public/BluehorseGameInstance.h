@@ -58,6 +58,10 @@ class BLUEHORSE_API UBluehorseGameInstance : public UGameInstance
 
 public:
 	virtual void Init() override;
+	virtual void Shutdown() override;
+
+	void RegisterMouseBlocker();
+	void RemoveMouseBlocker();
 
 	//--- ƒŒƒxƒ‹ ---//
 	UFUNCTION(BlueprintPure, meta = (GameplayTagFilter = "GameData.Level"))

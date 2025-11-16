@@ -137,6 +137,36 @@ bool UBluehorseGameInstance::IsCurrentLevelCombatArea() const
     return false;
 }
 
+void UBluehorseGameInstance::RegisterMouseBlocker()
+{
+    // MouseBlockerInputProcessor を IInputProcessor として扱う
+    TSharedRef<FMouseBlockerInputProcessor> MouseBlocker = MakeShared<FMouseBlockerInputProcessor>();
+
+    // Slate に登録（戻り値の型は IInputProcessor）
+    FSlateApplication::Get().RegisterInputPreProcessor(MouseBlocker, 0);
+
+    // 参照を保存
+    MouseBlockerRef = MouseBlocker;
+
+    UE_LOG(LogTemp, Warning, TEXT("MouseBlocker registered!"));
+}
+
+void UBluehorseGameInstance::RemoveMouseBlocker()
+{
+    // MouseBlockerRef が有効（Slate に登録済み）の場合のみ解除を行う
+    if (MouseBlockerRef.IsValid())
+    {
+        // Slate の InputPreProcessor から登録を解除
+        // エディタ操作にも影響が出るためデフォルトに戻す
+        FSlateApplication::Get().UnregisterInputPreProcessor(MouseBlockerRef);
+
+        // SharedPtr の参照をクリア（完全に破棄）
+        MouseBlockerRef.Reset();
+
+        UE_LOG(LogTemp, Warning, TEXT("MouseBlocker unregistered!"));
+    }
+}
+
 // PreLoadMapが呼ばれたときに実行される
 void UBluehorseGameInstance::OnPreLoadMap(const FString& MapName)
 {
@@ -169,16 +199,7 @@ void UBluehorseGameInstance::Init()
 {
     Super::Init();
 
-    // MouseBlockerInputProcessor を IInputProcessor として扱う
-    TSharedRef<FMouseBlockerInputProcessor> MouseBlocker = MakeShared<FMouseBlockerInputProcessor>();
-
-    // Slate に登録（戻り値の型は IInputProcessor）
-    FSlateApplication::Get().RegisterInputPreProcessor(MouseBlocker, 0);
-
-    // 参照を保存
-    MouseBlockerRef = MouseBlocker;
-
-    UE_LOG(LogTemp, Warning, TEXT("MouseBlocker registered!"));
+    RegisterMouseBlocker();
 
     FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &ThisClass::OnPreLoadMap);
     FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::OnDestinationWorldLoaded);
@@ -226,4 +247,11 @@ void UBluehorseGameInstance::Init()
     {
         UE_LOG(LogTemp, Warning, TEXT("[GameInstance] No matching LevelTag found for map: %s"), *CurrentMapName);
     }
+}
+
+void UBluehorseGameInstance::Shutdown()
+{
+    Super::Shutdown();
+
+    RemoveMouseBlocker();
 }
