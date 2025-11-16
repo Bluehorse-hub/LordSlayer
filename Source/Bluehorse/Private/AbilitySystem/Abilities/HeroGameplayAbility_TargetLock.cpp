@@ -15,11 +15,14 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "GameFramework/SpringArmComponent.h"
 
 #include "BluehorseDebugHelper.h"
 
 void UHeroGameplayAbility_TargetLock::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	GetHeroCharacterFromActorInfo()->bUseControllerRotationYaw = true;
+
 	TryLockOnTarget();
 	InitTargetLockMappingContext();
 
@@ -28,6 +31,8 @@ void UHeroGameplayAbility_TargetLock::ActivateAbility(const FGameplayAbilitySpec
 
 void UHeroGameplayAbility_TargetLock::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+	GetHeroCharacterFromActorInfo()->bUseControllerRotationYaw = false;
+
 	ResetTargetLockMappingContext();
 	// ターゲットロック終了時にはターゲットロックに関するものを破棄する
 	CleanUp();
@@ -35,7 +40,8 @@ void UHeroGameplayAbility_TargetLock::EndAbility(const FGameplayAbilitySpecHandl
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-// ロック対象を追跡するためにTick処理を行う
+// ロックオン処理中に毎フレーム呼ばれるTick関数。
+// ロック対象の生存確認・回転制御・UI位置更新などを行う
 void UHeroGameplayAbility_TargetLock::OnTargetLockTick(float DeltaTime)
 {
 	// ロック対象がいない、もしくはロック対象・自身が死亡したときはアビリティを終了し即座に終了
@@ -48,24 +54,40 @@ void UHeroGameplayAbility_TargetLock::OnTargetLockTick(float DeltaTime)
 		return;
 	}
 
+	// ロックオンUI（ターゲットアイコン）の位置を更新
 	SetTargetLockWidgetPosition();
 
+	// 回避（ローリング）中はロックオン方向の上書きを行わない
+	//  ローリング中に強制回転すると操作感が悪くなるため
 	const bool bShouldOverrideRotation = !UBluehorseFunctionLibrary::NativeDoesActorHaveTag(GetHeroCharacterFromActorInfo(), BluehorseGameplayTags::Player_Status_Rolling);
 
+	// ロックオン中にキャラとカメラの向きを敵方向へ補間する
 	if (bShouldOverrideRotation)
 	{
+		// プレイヤーからターゲットへのLookAt角度を計算
 		FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(
 			GetHeroCharacterFromActorInfo()->GetActorLocation(),
 			CurrentLockedActor->GetActorLocation()
 		);
 
+		// カメラ視点補正（俯瞰など任意の微調整）
 		LookAtRot -= FRotator(TargetLockCameraOffsetDistance, 0.f, 0.f);
 
+		// Pitch・Roll を固定（キャラの制御はYaw中心のため）
+		LookAtRot.Pitch = 0.f;
+		LookAtRot.Roll = 0.f;
+
+		// 現在のControlRotationとLookAtRotを補間することで
+		// 一気に向きを変えず、自然にカメラがターゲットへ向く
 		const FRotator CurrentControlRot = GetHeroControllerFromActorInfo()->GetControlRotation();
 		const FRotator TargetRot = FMath::RInterpTo(CurrentControlRot, LookAtRot, DeltaTime, TargetLockRotationInterSpeed);
 
+		// ControllerRotation を更新してカメラをターゲット方向に向ける。
+		// ※ ActorRotationは書き換えないことで、キャラの小刻みな揺れの発生を防止。
 		GetHeroControllerFromActorInfo()->SetControlRotation(FRotator(TargetRot.Pitch, TargetRot.Yaw, 0.f));
-		GetHeroCharacterFromActorInfo()->SetActorRotation(FRotator(0.f, TargetRot.Yaw, 0.f));
+
+		// ※ ActorRotationを直接いじるとアプリ化したものでキャラが小刻みな揺れたので、以下のような処理は今後しない
+		// GetHeroCharacterFromActorInfo()->SetActorRotation(FRotator(0.f, TargetRot.Yaw, 0.f));
 	}
 }
 
@@ -183,25 +205,33 @@ void UHeroGameplayAbility_TargetLock::GetAvailableActorsAroundTarget(TArray<AAct
 		return;
 	}
 
+	// プレイヤー位置
 	const FVector PlayerLocation = GetHeroCharacterFromActorInfo()->GetActorLocation();
+
+	// プレイヤーから現在ロック中ターゲットの方向ベクトル（正規化）
 	const FVector PlayerToCurrentNormalized = (CurrentLockedActor->GetActorLocation() - PlayerLocation).GetSafeNormal();
 
 	// Lock可能な対象について左右どちらにいるか確認する
 	for (AActor* AvailableActor : AvailableActorsToLock)
 	{
-		// Lock可能でない。対象を現在ロック中なら処理しない
+		// Lock可能でない、対象を現在ロック中なら処理しない
 		if (!AvailableActor || AvailableActor == CurrentLockedActor) continue;
 
+		// プレイヤーから対象の方向（正規化）
 		const FVector PlayerToAvailableNormalized = (AvailableActor->GetActorLocation() - PlayerLocation).GetSafeNormal();
 
+		// 外積を使用して左右判定を行う
+		// CrossResult.Z の符号で左右を判断できる
 		const FVector CrossResult = FVector::CrossProduct(PlayerToCurrentNormalized, PlayerToAvailableNormalized);
 
 		if (CrossResult.Z > 0.f)
 		{
+			// 右側に位置するアクター
 			OutActorsOnRight.AddUnique(AvailableActor);
 		}
 		else
 		{
+			// 左側に位置するアクター
 			OutActorsOnLeft.AddUnique(AvailableActor);
 		}
 	}
@@ -209,14 +239,19 @@ void UHeroGameplayAbility_TargetLock::GetAvailableActorsAroundTarget(TArray<AAct
 
 void UHeroGameplayAbility_TargetLock::DrawTargetLockWidget()
 {
+	// まだUIが生成されていない場合のみ生成処理を行う
 	if (!DrawnTargetLockWidget)
 	{
+		// TargetLockWidgetClassが未設定の場合はエラーを出す
 		checkf(TargetLockWidgetClass, TEXT("Forgot to assign a valid widget class in BP"));
 
+		// ウィジェット生成
 		DrawnTargetLockWidget = CreateWidget<UBluehorseWidgetBase>(GetHeroControllerFromActorInfo(), TargetLockWidgetClass);
 
+		// ウィジェット生成に失敗した場合はcheckで実行を停止
 		check(DrawnTargetLockWidget);
 
+		// ウィジェットをViewportに追加して画面に表示
 		DrawnTargetLockWidget->AddToViewport();
 	}
 }
