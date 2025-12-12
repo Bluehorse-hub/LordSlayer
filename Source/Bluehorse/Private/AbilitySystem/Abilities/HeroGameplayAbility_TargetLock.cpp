@@ -73,8 +73,7 @@ void UHeroGameplayAbility_TargetLock::OnTargetLockTick(float DeltaTime)
 		// カメラ視点補正（俯瞰など任意の微調整）
 		LookAtRot -= FRotator(TargetLockCameraOffsetDistance, 0.f, 0.f);
 
-		// Pitch・Roll を固定（キャラの制御はYaw中心のため）
-		LookAtRot.Pitch = 0.f;
+		// Rollを固定（キャラの制御はYaw中心のため）
 		LookAtRot.Roll = 0.f;
 
 		// 現在のControlRotationとLookAtRotを補間することで
