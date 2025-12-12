@@ -10,11 +10,15 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Look, "InputTag.Look");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Roll, "InputTag.Roll");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Block, "InputTag.Block");
-	UE_DEFINE_GAMEPLAY_TAG(InputTag_Parry, "InputTag.Parry");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_SubWeaponSkill, "InputTag.SubWeaponSkill");
+	//UE_DEFINE_GAMEPLAY_TAG(InputTag_Parry, "InputTag.Parry");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_FlashSlash, "InputTag.FlashSlash");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Toggleable, "InputTag.Toggleable");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Toggleable_TargetLock, "InputTag.Toggleable.TargetLock");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Equip_Sword, "InputTag.Equip.Sword");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Unequip_Sword, "InputTag.Unequip.Sword");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_Equip_Nodachi, "InputTag.Equip.Nodachi");
+	UE_DEFINE_GAMEPLAY_TAG(InputTag_Unequip_Nodachi, "InputTag.Unequip.Nodachi");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_LightAttack_Sword, "InputTag.LightAttack.Sword");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_HeavyAttack_Sword, "InputTag.HeavyAttack.Sword");
 	UE_DEFINE_GAMEPLAY_TAG(InputTag_Skill, "InputTag.Skill");
@@ -36,6 +40,8 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Look, "Player.Ability.Look");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Equip_Sword, "Player.Ability.Equip.Sword");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Unequip_Sword, "Player.Ability.Unequip.Sword");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Equip_Nodachi, "Player.Ability.Equip.Nodachi");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Unequip_Nodachi, "Player.Ability.Unequip.Nodachi");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Interact, "Player.Ability.Interact");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_UsePotion, "Player.Ability.UsePotion");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_UseItem, "Player.Ability.UseItem");
@@ -52,6 +58,12 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Attack_Sword_Heavy_2, "Player.Ability.Attack.Sword.Heavy.2");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Attack_Sword_Heavy_3, "Player.Ability.Attack.Sword.Heavy.3");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Attack_Sword_Heavy_4, "Player.Ability.Attack.Sword.Heavy.4");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Attack_Nodachi_Light, "Player.Ability.Attack.Nodachi.Light");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Attack_Nodachi_Light_1, "Player.Ability.Attack.Nodachi.Light.1");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Attack_Nodachi_Light_2, "Player.Ability.Attack.Nodachi.Light.2");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Attack_Nodachi_Heavy, "Player.Ability.Attack.Nodachi.Heavy");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Attack_Nodachi_Heavy_1, "Player.Ability.Attack.Nodachi.Heavy.1");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Attack_Nodachi_Heavy_2, "Player.Ability.Attack.Nodachi.Heavy.2");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_HitPause, "Player.Ability.HitPause");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Roll_Combat, "Player.Ability.Roll.Combat");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Roll_NotCombat, "Player.Ability.Roll.NotCombat");
@@ -60,19 +72,24 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_MustBeHeld, "Player.Ability.MustBeHeld");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Skill_Parry, "Player.Ability.Skill.Parry");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Skill_Slash, "Player.Ability.Skill.Slash");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Skill_FlashSlash, "Player.Ability.Skill.FlashSlash");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Ultimate, "Player.Ability.Ultimate");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Ability_Victory, "Player.Ability.Victory");
 
 	UE_DEFINE_GAMEPLAY_TAG(Player_Weapon_Sword, "Player.Weapon.Sword");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Weapon_Shield, "Player.Weapon.Shield");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Weapon_Nodachi, "Player.Weapon.Nodachi");
 
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Equip_Sword, "Player.Event.Equip.Sword");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Unequip_Sword, "Player.Event.Unequip.Sword");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Equip_Shield, "Player.Event.Equip.Shield");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Unequip_Shield, "Player.Event.Unequip.Shield");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Equip_Nodachi, "Player.Event.Equip.Nodachi");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Unequip_Nodachi, "Player.Event.Unequip.Nodachi");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_HitPause, "Player.Event.HitPause");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_SuccessfulBlock, "Player.Event.SuccessfulBlock");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_SuccessfulParry, "Player.Event.SuccessfulParry");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Event_SuccessfulHajiki, "Player.Event.SuccessfulHajiki");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Combo_PreInput, "Player.Event.Combo.PreInput");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_Combo_NextAttack, "Player.Event.Combo.NextAttack");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Event_SwitchTarget_Left, "Player.Event.SwitchTarget.Left");
@@ -85,6 +102,7 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Player_Status_TargetLock, "Player.Status.TargetLock");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Status_Parrying, "Player.Status.Parrying");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Status_Invincible, "Player.Status.Invincible");
+	UE_DEFINE_GAMEPLAY_TAG(Player_Status_Hajiki, "Player.Status.Hajiki");
 	UE_DEFINE_GAMEPLAY_TAG(Player_Status_NoCancel, "Player.Status.NoCancel");
 
 	UE_DEFINE_GAMEPLAY_TAG(Player_SetByCaller_AttackType_Light, "Player.SetByCaller.AttackType.Light");
