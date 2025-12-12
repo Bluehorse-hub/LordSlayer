@@ -137,6 +137,28 @@ bool UBluehorseGameInstance::IsCurrentLevelCombatArea() const
     return false;
 }
 
+void UBluehorseGameInstance::SetCharacterStartupData(UDataAsset_StartUpDataBase* NewData)
+{
+    // 有効なスタートアップデータが渡された場合
+    if (NewData)
+    {
+        // 選択中のキャラクタースタートアップデータを更新
+        SelectedCharacterStartupData = NewData;
+
+        // デバッグ用ログ：現在設定されているデータアセット名を出力
+        UE_LOG(LogTemp, Warning, TEXT("CharacterStartUpData changed to: %s"),
+            *NewData->GetName());
+    }
+    else
+    {
+        // nullptr が渡された場合は選択データをリセット
+        SelectedCharacterStartupData.Reset();
+
+        // デバッグ用ログ：データが未設定状態になったことを通知
+        UE_LOG(LogTemp, Warning, TEXT("CharacterStartUpData reset to NULL."));
+    }
+}
+
 void UBluehorseGameInstance::RegisterMouseBlocker()
 {
     // MouseBlockerInputProcessor を IInputProcessor として扱う
@@ -199,7 +221,7 @@ void UBluehorseGameInstance::Init()
 {
     Super::Init();
 
-    RegisterMouseBlocker();
+    //RegisterMouseBlocker();
 
     FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &ThisClass::OnPreLoadMap);
     FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::OnDestinationWorldLoaded);
@@ -253,5 +275,5 @@ void UBluehorseGameInstance::Shutdown()
 {
     Super::Shutdown();
 
-    RemoveMouseBlocker();
+    //RemoveMouseBlocker();
 }

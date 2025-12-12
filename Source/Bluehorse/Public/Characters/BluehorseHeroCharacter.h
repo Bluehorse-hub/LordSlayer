@@ -15,6 +15,7 @@ struct FInputActionValue;
 class UHeroCombatComponent;
 class UHeroUIComponent;
 class UInventoryComponent;
+class UHajikiAttributeSet;
 
 /**
  * 
@@ -66,6 +67,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	UInventoryComponent* InventoryComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AbilitySystem", meta = (AllowPrivateAccess = "true"))
+	UHajikiAttributeSet* HajikiAttributeSet;
 
 	UPROPERTY()
 	FVector2D SwitchDirection = FVector2D::ZeroVector;

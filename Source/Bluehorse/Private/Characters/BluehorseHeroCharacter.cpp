@@ -17,6 +17,9 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Interfaces/InteractableInterface.h"
 #include "Components/Inventory/InventoryComponent.h"
+#include "AbilitySystem/Attribute/HajikiAttributeSet.h"
+#include "BluehorseGameInstance.h"
+#include "BluehorseFunctionLibrary.h"
 
 #include "BluehorseDebugHelper.h"
 
@@ -57,6 +60,8 @@ ABluehorseHeroCharacter::ABluehorseHeroCharacter()
 	HeroCombatComponent = CreateDefaultSubobject<UHeroCombatComponent>(TEXT("HeroCombatComponent"));
 	HeroUIComponent = CreateDefaultSubobject<UHeroUIComponent>(TEXT("HeroUIComponent"));
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+
+	HajikiAttributeSet = CreateDefaultSubobject<UHajikiAttributeSet>(TEXT("HajikiAttributeSet"));
 }
 
 
@@ -79,12 +84,18 @@ void ABluehorseHeroCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	// 初期アビリティを同期ロードする処理
-	if (!CharacterStartUpData.IsNull())
+	// GameInstanceを取得（武器変更用にデータを取得するため）
+	if (UBluehorseGameInstance* BGI = UBluehorseFunctionLibrary::GetBluehorseGameInstance(this))
 	{
-		if (UDataAsset_StartUpDataBase* LoadedData = CharacterStartUpData.LoadSynchronous())
+		// 初期アビリティを同期ロードする処理
+		// 旧処理なので不要かもしれないが、安定動作のために一旦残す（要改善）
+		if (!CharacterStartUpData.IsNull())
 		{
-			LoadedData->GiveToAbilitySystemComponent(BluehorseAbilitySystemComponent);
+			// 選択中キャラクターのスタートアップデータを同期ロード
+			if (UDataAsset_StartUpDataBase* LoadedData = BGI->SelectedCharacterStartupData.LoadSynchronous())
+			{
+				LoadedData->GiveToAbilitySystemComponent(BluehorseAbilitySystemComponent);
+			}
 		}
 	}
 }

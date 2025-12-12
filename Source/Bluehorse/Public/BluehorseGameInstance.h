@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "Components/AudioComponent.h"
 #include "MouseBlockerInputProcessor.h"
+#include "DataAssets/StartUpData/DataAsset_StartUpDataBase.h"
 #include "BluehorseGameInstance.generated.h"
 
 USTRUCT(BlueprintType)
@@ -91,11 +92,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Level")
 	bool IsCurrentLevelCombatArea() const;
 
+	UFUNCTION(BlueprintCallable, Category = "CharacterData")
+	void SetCharacterStartupData(UDataAsset_StartUpDataBase* NewData);
+
 	TSharedPtr<IInputProcessor> MouseBlockerRef;
 
 	//--- アイテム ---//
 	UPROPERTY(BlueprintReadWrite, Category = "Inventory")
 	TArray<FStoredItemData> PersistentInventory;
+
+	//--- キャラの初期データ ---//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UDataAsset_StartUpDataBase> SelectedCharacterStartupData;
 
 protected:
 	virtual void OnPreLoadMap(const FString& MapName);
