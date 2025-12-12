@@ -56,4 +56,5 @@ protected:
 
 public:
 	FORCEINLINE UBoxComponent* GetWeaponCollisionBox() const { return WeaponCollisionBox; }
+	FORCEINLINE UStaticMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
 };
