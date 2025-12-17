@@ -11,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "BluehorseGameplayTags.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "BluehorseFunctionLibrary.h"
 
 #include "BluehorseDebugHelper.h"
 
@@ -67,6 +68,42 @@ void UHeroGameplayAbility_Hajiki::ActivateAbility(const FGameplayAbilitySpecHand
 
 	// 弾き成功時のエフェクトを発生させる
 	SpawnHajikiEffectAtLocation();
+}
+
+void UHeroGameplayAbility_Hajiki::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+{
+	UBluehorseFunctionLibrary::RemoveGameplayTagFromActorIfFound(GetHeroCharacterFromActorInfo(), BluehorseGameplayTags::Player_Status_Hajiki);
+
+	if (!ActorInfo || !ActorInfo->AbilitySystemComponent.IsValid())
+	{
+		return;
+	}
+
+	if (!HajikiEffectClass)
+	{
+		return;
+	}
+
+	UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
+
+	// ===== Make Outgoing Gameplay Effect Spec =====
+	FGameplayEffectSpecHandle SpecHandle =
+		MakeOutgoingGameplayEffectSpec(HajikiEffectClass, 1.0f);
+
+	if (!SpecHandle.IsValid())
+	{
+		return;
+	}
+
+	// ===== Apply Gameplay Effect Spec To Owner =====
+	ApplyGameplayEffectSpecToOwner(
+		Handle,
+		ActorInfo,
+		ActivationInfo,
+		SpecHandle
+	);
+
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 int32 UHeroGameplayAbility_Hajiki::GetCurrentHajikiAnimIndexFromAttribute()
@@ -187,6 +224,9 @@ void UHeroGameplayAbility_Hajiki::UpdateHajikiCount()
 
 	// 弾きの使用回数を加算
 	HajikiSet->AddHajikiCount(1.0);
+
+	const float AfterCount = HajikiSet->GetCurrentHajikiCount();
+	UE_LOG(LogTemp, Warning, TEXT("[Hajiki] Count After : %.0f"), AfterCount);
 
 	// 一定回数に到達した場合の確認用ログ
 	// （将来的に強化状態付与や別アビリティ解放などつけたい）

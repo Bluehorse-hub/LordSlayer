@@ -24,6 +24,8 @@ public:
 		const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo,
 		const FGameplayEventData* TriggerEventData) override;
+
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 private:
 	// ----- アニメーション制御 -----
 	UFUNCTION(BlueprintCallable, Category = "Hajiki")
@@ -64,6 +66,9 @@ private:
 	// 再生するサウンド
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hajiki|Sound", meta = (AllowPrivateAccess = "true"))
 	USoundBase* HajikiSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Hajiki")
+	TSubclassOf<UGameplayEffect> HajikiEffectClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Hajiki", meta = (AllowPrivateAccess = "true"))
 	int32 CountForReinforcement = 10;
