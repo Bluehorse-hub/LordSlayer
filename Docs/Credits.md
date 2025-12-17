@@ -33,6 +33,13 @@
   **ライセンス**：Fab利用規約に準拠  
   **備考**：アセットの著作権は制作団体に帰属します。本プロジェクトは非営利目的での利用です。
 
+### ノダチのモーション
+
+- **アセット提供元**： [Fab（Unreal Engine Marketplace）](https://www.fab.com/ja/listings/bdac0615-cf5d-4f84-9c67-a356c530a493)  
+  **制作団体**：9CG  
+  **ライセンス**：Fab利用規約に準拠  
+  **備考**：アセットの著作権は制作団体に帰属します。本プロジェクトは非営利目的での利用です。
+
 ## Map
 - **アセット提供元**： [Fab（Unreal Engine Marketplace）](https://www.fab.com/ja/listings/c13bd0dc-ac4d-4595-b284-f81386b2e6ef)  
   **制作団体**：Infuse Studio  
