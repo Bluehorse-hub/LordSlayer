@@ -53,8 +53,8 @@ Unreal Engine 5.4 + Gameplay Ability System（GAS）を用いて、
 
 ## デモ動画（Demo）
 
-2025/11/9時点  
-[デモ動画（Youtube）](https://youtu.be/M72lQCS_8zA?si=htLGCTaQBhBptdsk) 
+2025/12/17時点  
+[デモ動画（Youtube）](https://www.youtube.com/watch?v=OP5L3-syWrw) 
 
 ## 開発の狙い（Design Philosophy）
 
