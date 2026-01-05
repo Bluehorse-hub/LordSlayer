@@ -150,4 +150,5 @@ namespace BluehorseGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(GameData_Level_CombatGameModeMap, "GameData.Level.CombatGameModeMap");
 	UE_DEFINE_GAMEPLAY_TAG(GameData_Level_BossMap, "GameData.Level.BossMap");
 	UE_DEFINE_GAMEPLAY_TAG(GameData_Level_TitleMap, "GameData.Level.TitleMap");
+	UE_DEFINE_GAMEPLAY_TAG(GameData_Level_TutorialMap, "GameData.Level.TutorialMap");
 }
