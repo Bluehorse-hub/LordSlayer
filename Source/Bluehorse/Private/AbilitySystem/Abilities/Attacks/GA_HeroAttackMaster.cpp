@@ -50,35 +50,72 @@ FGameplayEffectSpecHandle UGA_HeroAttackMaster::GetHeroEquippedLeftHandWeaponDam
 // ダメージを実際に適用する処理
 void UGA_HeroAttackMaster::HandleApplyDamage(const FGameplayEventData& EventData)
 {
+    UE_LOG(LogTemp, Warning, TEXT("[HandleApplyDamage] Start"));
+
     // 対象アクターを取得（TargetはTObjectPtr<const AActor>なのでconst_castを使用）
     AActor* TargetActor = const_cast<AActor*>(EventData.Target.Get());
 
+    UE_LOG(LogTemp, Warning, TEXT("[HandleApplyDamage] TargetActor: %s"),
+        TargetActor ? *TargetActor->GetName() : TEXT("NULL"));
+
     if (!TargetActor)
     {
+        UE_LOG(LogTemp, Error, TEXT("[HandleApplyDamage] TargetActor is NULL. Abort."));
         return;
     }
+
+    // Ability / Owner 情報
+    if (GetAvatarActorFromActorInfo())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[HandleApplyDamage] AvatarActor: %s"),
+            *GetAvatarActorFromActorInfo()->GetName());
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("[HandleApplyDamage] AvatarActor is NULL"));
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("[HandleApplyDamage] IsRightWeapon: %s"),
+        IsRightWeapon ? TEXT("true") : TEXT("false"));
 
     FActiveGameplayEffectHandle ActiveGameplayEffectHandle;
 
     // 使用している武器（右手／左手）に応じてSpecHandleを取得し、Effectを適用
     if (IsRightWeapon)
     {
+        UE_LOG(LogTemp, Warning, TEXT("[HandleApplyDamage] Apply Right Weapon Damage Spec"));
+
         ActiveGameplayEffectHandle = NativeApplyEffectSpecHandleToTarget(TargetActor, GetHeroEquippedRightHandWeaponDamageSpecHandle());
     }
     else
     {
+        UE_LOG(LogTemp, Warning, TEXT("[HandleApplyDamage] Apply Left Weapon Damage Spec"));
         ActiveGameplayEffectHandle = NativeApplyEffectSpecHandleToTarget(TargetActor, GetHeroEquippedLeftHandWeaponDamageSpecHandle());
     }
+
+    UE_LOG(LogTemp, Warning, TEXT("[HandleApplyDamage] Effect Applied Result: %s"),
+        ActiveGameplayEffectHandle.WasSuccessfullyApplied() ? TEXT("SUCCESS") : TEXT("FAILED"));
 
     // 成功時にヒットリアクションイベントを発火（GASイベント通知）
     if (ActiveGameplayEffectHandle.WasSuccessfullyApplied())
     {
+        UE_LOG(LogTemp, Warning,
+            TEXT("[HandleApplyDamage] Send HitReact GameplayEvent to %s"),
+            *TargetActor->GetName());
+
         UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
             TargetActor,
-            BluehorseGameplayTags::Shared_Ability_HitReact,
+            BluehorseGameplayTags::Shared_Event_HitReact,
             EventData
         );
     }
+    else
+    {
+        UE_LOG(LogTemp, Error,
+            TEXT("[HandleApplyDamage] Damage Effect was NOT applied. HitReact will NOT be sent."));
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("[HandleApplyDamage] End"));
 }
 
 // モーション値（攻撃倍率など）をDataTableから取得
