@@ -15,6 +15,7 @@ class BLUEHORSE_API UBluehorseTutorialWidget : public UBluehorseWidgetBase
 	GENERATED_BODY()
 
 protected:
+	void NativeConstruct() override;
 	FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 	UFUNCTION(BlueprintCallable)

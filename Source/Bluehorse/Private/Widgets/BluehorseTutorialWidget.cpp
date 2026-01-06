@@ -5,6 +5,27 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "BluehorseFunctionLibrary.h"
 #include "Widgets/BluehorseWidgetBase.h"
+#include "Kismet/GameplayStatics.h"
+
+void UBluehorseTutorialWidget::NativeConstruct()
+{
+    Super::NativeConstruct();
+
+    UE_LOG(LogTemp, Warning, TEXT("[TutorialWidget] NativeConstruct START"));
+
+    // チュートリアル中はゲームをポーズ
+    if (UWorld* World = GetWorld())
+    {
+        UGameplayStatics::SetGamePaused(World, true);
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("[TutorialWidget] Game Paused on Construct"));
+
+    // チュートリアル以外のUIは非表示にする
+    HideOtherWidgets();
+
+    UE_LOG(LogTemp, Warning, TEXT("[TutorialWidget] NativeConstruct END"));
+}
 
 FReply UBluehorseTutorialWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
@@ -15,7 +36,10 @@ FReply UBluehorseTutorialWidget::NativeOnPreviewKeyDown(const FGeometry& InGeome
         // チュートリアルを読み終えたので破棄
         RemoveFromParent();
 
+        // 非表示にしていたUIを表示する
         RestoreOtherWidgets();
+
+        const bool bSucceeded = UGameplayStatics::SetGamePaused(GetWorld(), false);
 
         // 入力をここで消費し、他に伝播させない
         return FReply::Handled();
