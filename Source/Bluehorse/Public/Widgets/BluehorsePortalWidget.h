@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/BluehorseWidgetBase.h"
+#include "GameplayTagContainer.h"
 #include "BluehorsePortalWidget.generated.h"
 
-class UBluehorseWidgetBase;
 /**
  * 
  */
@@ -30,6 +30,9 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "PortalWidget")
 	void BP_OnHighlightChanged(int32 Index, bool bIsHighlighted);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PortalWidget", meta = (GameplayTagFilter = "GameData.Level"))
+	FGameplayTag DestinationMapTag;
 
 private:
 	UPROPERTY(EditDefaultsOnly ,BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
