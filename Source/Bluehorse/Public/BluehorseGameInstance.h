@@ -105,6 +105,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<UDataAsset_StartUpDataBase> SelectedCharacterStartupData;
 
+	//--- チュートリアル用の変数 ---//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool ItemTutorial = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool ControlTutorial = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool CombatTutorial = false;
+
 protected:
 	virtual void OnPreLoadMap(const FString& MapName);
 	virtual void OnDestinationWorldLoaded(UWorld* LoadedWorld);
