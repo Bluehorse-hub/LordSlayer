@@ -74,6 +74,12 @@ public:
 		return true;
 	}
 
+	// ダブルクリックを無効化
+	virtual bool HandleMouseButtonDoubleClickEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override
+	{
+		return true;
+	}
+
 	// デバッグ名
 	virtual const TCHAR* GetDebugName() const override
 	{
