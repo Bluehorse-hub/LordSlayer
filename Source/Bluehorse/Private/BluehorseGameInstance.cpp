@@ -90,6 +90,26 @@ void UBluehorseGameInstance::PlayBGM(USoundBase* NewBGM, float FadeOutTime, floa
     }
 }
 
+FGameplayTag UBluehorseGameInstance::GetCurrentLevelTag() const
+{
+    // 現在のレベルタグが未設定、または無効な場合
+    if (!CurrentLevelTag.IsValid())
+    {
+        // デバッグ用ログ：タグが無効であることを通知
+        UE_LOG(LogTemp, Warning, TEXT("[GameInstance] CurrentLevelTag is NOT valid"));
+
+        // 無効なタグを返す（呼び出し側で IsValid() チェック前提）
+        return FGameplayTag();
+    }
+
+    // デバッグ用ログ：現在のレベルタグを出力
+    UE_LOG(LogTemp, Warning, TEXT("[GameInstance] CurrentLevelTag is %s."),
+        *CurrentLevelTag.ToString());
+
+    // 有効な現在レベルタグを返す
+    return CurrentLevelTag;
+}
+
 // レベル遷移時に呼ばれ、現在のLevelTagを更新
 void UBluehorseGameInstance::NotifyLevelTransitionByTag(FGameplayTag NewLevelTag)
 {
@@ -221,7 +241,7 @@ void UBluehorseGameInstance::Init()
 {
     Super::Init();
 
-    // RegisterMouseBlocker();
+    RegisterMouseBlocker();
 
     FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &ThisClass::OnPreLoadMap);
     FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::OnDestinationWorldLoaded);
@@ -275,5 +295,5 @@ void UBluehorseGameInstance::Shutdown()
 {
     Super::Shutdown();
 
-    // RemoveMouseBlocker();
+    RemoveMouseBlocker();
 }

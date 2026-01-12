@@ -74,6 +74,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PlayBGM(USoundBase* NewBGM, float FadeOutTime = 1.0f, float FadeInTime = 1.0f);
 
+	UFUNCTION(BlueprintCallable)
+	FGameplayTag GetCurrentLevelTag() const;
+
 	UPROPERTY(BlueprintReadWrite, Category = "Level Transition")
 	bool bHasTransitionedFromOtherLevel = false;
 
