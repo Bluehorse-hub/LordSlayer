@@ -35,11 +35,6 @@ void UPawnCombatComponent::RegisterSpawnWeapon(FGameplayTag InWeaponTagToRegiste
 	default:
 		break;
 	}
-
-	/*UE_LOG(LogTemp, Warning, TEXT("[RegisterSpawnWeapon] Tag: %s | Slot: %s | Weapon: %s"),
-		*InWeaponTagToRegister.ToString(),
-		*UEnum::GetValueAsString(Slot),
-		*InWeaponToRegister->GetName());*/
 }
 
 // Tagから武器を取得する関数
@@ -56,6 +51,7 @@ ABluehorseWeaponBase* UPawnCombatComponent::GetCharacterCarriedWeaponByTag(FGame
 	return nullptr;
 }
 
+// 現在装備中（CurrentEquippedWeaponTag）の武器を取得する
 ABluehorseWeaponBase* UPawnCombatComponent::GetCharacterCurrentEquippedWeapon() const
 {
 	if (!CurrentEquippedWeaponTag.IsValid())
@@ -66,6 +62,7 @@ ABluehorseWeaponBase* UPawnCombatComponent::GetCharacterCurrentEquippedWeapon() 
 	return GetCharacterCarriedWeaponByTag(CurrentEquippedWeaponTag);
 }
 
+// 右手装備武器を取得する
 ABluehorseWeaponBase* UPawnCombatComponent::GetCharacterEquippedRightHandWeapon() const
 {
 	if (!EquippedRightHandWeaponTag.IsValid())
@@ -76,6 +73,7 @@ ABluehorseWeaponBase* UPawnCombatComponent::GetCharacterEquippedRightHandWeapon(
 	return GetCharacterCarriedWeaponByTag(EquippedRightHandWeaponTag);
 }
 
+// 左手装備武器を取得する
 ABluehorseWeaponBase* UPawnCombatComponent::GetCharacterEquippedLeftHandWeapon() const
 {
 	if (!EquippedLeftHandWeaponTag.IsValid())
@@ -86,13 +84,16 @@ ABluehorseWeaponBase* UPawnCombatComponent::GetCharacterEquippedLeftHandWeapon()
 	return GetCharacterCarriedWeaponByTag(EquippedLeftHandWeaponTag);
 }
 
+// 武器の当たり判定（Collision）を ON/OFF する
 void UPawnCombatComponent::ToggleWeaponCollision(bool bShouldEnable, EToggleDamageType ToggleDamageType)
 {
+	// 現状は左右手武器のコリジョン切り替えのみ対応
 	if (ToggleDamageType == EToggleDamageType::EquippedRightHandWeapon || ToggleDamageType == EToggleDamageType::EquippedLeftHandWeapon)
 	{
 
 		ABluehorseWeaponBase* WeaponToToggle;
 
+		// 対象武器を決定
 		if (ToggleDamageType == EToggleDamageType::EquippedRightHandWeapon)
 		{
 			WeaponToToggle = GetCharacterEquippedRightHandWeapon();
@@ -102,14 +103,17 @@ void UPawnCombatComponent::ToggleWeaponCollision(bool bShouldEnable, EToggleDama
 			WeaponToToggle = GetCharacterEquippedLeftHandWeapon();
 		}
 
+		// 設計上、攻撃時に対象武器が無いのは不正なのでチェック
 		check(WeaponToToggle);
 
 		if (bShouldEnable)
 		{
+			// 攻撃開始：当たり判定を有効化（Overlap などの Query のみ）
 			WeaponToToggle->GetWeaponCollisionBox()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		}
 		else
 		{
+			// 攻撃終了：当たり判定を無効化
 			WeaponToToggle->GetWeaponCollisionBox()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 			// 攻撃終了時にはそれまでのヒットした相手の記録を破棄する
@@ -123,10 +127,12 @@ void UPawnCombatComponent::ToggleWeaponCollision(bool bShouldEnable, EToggleDama
 
 void UPawnCombatComponent::OnHitTargetActor(AActor* HitActor, const FHitResult& HitResult)
 {
+	// 派生（HeroCombat / EnemyCombat）で具体実装する
 }
 
 void UPawnCombatComponent::OnWeaponPulledFromTargetActor(AActor* InteractedActor)
 {
+	// 派生（HeroCombat / EnemyCombat）で具体実装する
 }
 
 

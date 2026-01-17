@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "PawnExtensionComponentBase.generated.h"
 
+// Pawn に付与される拡張コンポーネントの基底クラス
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BLUEHORSE_API UPawnExtensionComponentBase : public UActorComponent
