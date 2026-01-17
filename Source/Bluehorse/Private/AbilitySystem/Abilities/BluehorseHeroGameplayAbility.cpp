@@ -20,16 +20,20 @@ ABluehorseHeroCharacter* UBluehorseHeroGameplayAbility::GetHeroCharacterFromActo
 	return CachedBluehorseHeroCharacter.IsValid() ? CachedBluehorseHeroCharacter.Get() : nullptr;
 }
 
+// ActorInfo から Hero 用 PlayerController を取得する
 ABluehorseHeroController* UBluehorseHeroGameplayAbility::GetHeroControllerFromActorInfo()
 {
+	// まだキャッシュしていない場合のみ Cast を行う
 	if (!CachedBluehorseHeroController.IsValid())
 	{
+		// PlayerCharacter の GA では PlayerController をここから取得できる
 		CachedBluehorseHeroController = Cast<ABluehorseHeroController>(CurrentActorInfo->PlayerController);
 	}
 
 	return CachedBluehorseHeroController.IsValid() ? CachedBluehorseHeroController.Get() : nullptr;
 }
 
+// HeroCharacter が保持する CombatComponent を取得する
 UHeroCombatComponent* UBluehorseHeroGameplayAbility::GetHeroCombatComponentFromActorInfo()
 {
 	return GetHeroCharacterFromActorInfo()->GetHeroCombatComponent();

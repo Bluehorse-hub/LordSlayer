@@ -241,7 +241,7 @@ void UBluehorseGameInstance::Init()
 {
     Super::Init();
 
-    RegisterMouseBlocker();
+    // RegisterMouseBlocker();
 
     FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &ThisClass::OnPreLoadMap);
     FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::OnDestinationWorldLoaded);
@@ -295,5 +295,5 @@ void UBluehorseGameInstance::Shutdown()
 {
     Super::Shutdown();
 
-    RemoveMouseBlocker();
+    // RemoveMouseBlocker();
 }
