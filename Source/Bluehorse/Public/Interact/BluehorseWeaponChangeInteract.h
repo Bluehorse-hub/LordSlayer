@@ -20,8 +20,6 @@ public:
 	ABluehorseWeaponChangeInteract();
 
 protected:
-	// インタラクトの処理をオーバーライド
-	virtual void Interact_Implementation(AActor* Interactor) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UBluehorseWidgetBase> SelectWidget;

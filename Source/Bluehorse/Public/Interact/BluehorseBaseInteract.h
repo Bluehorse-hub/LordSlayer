@@ -18,6 +18,4 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* Mesh;
-
-	virtual void Interact_Implementation(AActor* Interactor) override;
 };

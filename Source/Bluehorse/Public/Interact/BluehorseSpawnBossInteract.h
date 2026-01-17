@@ -21,7 +21,7 @@ public:
 
 protected:
 	UFUNCTION(BlueprintCallable)
-	void SpawnBoss(AActor* InSpawnBoss, FTransform InSpawnBossTransform);
+	void SpawnBoss();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Boss")
 	TSubclassOf<AActor> BossClass;

@@ -6,22 +6,37 @@
 #include "LevelSequencePlayer.h"
 #include "LevelSequenceActor.h"
 
+/**
+ * ドア用インタラクトActor。
+ *
+ * - BaseInteract（Mesh）をルートとして、左右ドアメッシュを子として持つ
+ */
 ABluehorseDoorInteract::ABluehorseDoorInteract()
 {
+    // --- Door Mesh Setup ---------------------------------------------------
+    // 左右のドアパネル（見た目＋ブロック）を作成し、Base Mesh にアタッチする
 	LeftDoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftDoorMesh"));
-
 	LeftDoorMesh->SetupAttachment(Mesh);
 
 	RightDoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightDoorMesh"));
-
 	RightDoorMesh->SetupAttachment(Mesh);
 
+    // --- Collision Setup ---------------------------------------------------
+    // 目的：
+    // 1) Pawn をブロックして「閉まっている間は通れない」状態にする
+    // 2) 余計な当たり判定は無視して衝突の副作用を減らす
+
+    // Base Mesh（枠や当たり判定の土台）：
+    // - WorldStatic 扱い（固定物）として設定
     Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     Mesh->SetCollisionObjectType(ECC_WorldStatic);
     Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
     Mesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
     Mesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
+    // Left Door：
+    // - WorldDynamic 扱い（可動物）として設定
+    // - Pawn / WorldStatic をブロックし、壁やプレイヤーと干渉できるようにする
     LeftDoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     LeftDoorMesh->SetCollisionObjectType(ECC_WorldDynamic);
     LeftDoorMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -29,6 +44,7 @@ ABluehorseDoorInteract::ABluehorseDoorInteract()
     LeftDoorMesh->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
     LeftDoorMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
+    // Right Door：Left と同様のポリシー
     RightDoorMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     RightDoorMesh->SetCollisionObjectType(ECC_WorldDynamic);
     RightDoorMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
