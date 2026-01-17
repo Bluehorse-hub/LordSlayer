@@ -41,6 +41,7 @@ void UAnimNotify_SendEventTagToOwner::Notify(USkeletalMeshComponent* MeshComp, U
 
 	// GameplayEvent に渡すペイロードを構築
 	// 必要に応じて TargetData / OptionalObject なども拡張可能
+
 	FGameplayEventData Payload;
 	Payload.Instigator = Owner;
 	Payload.EventTag = EventTagToSend;
