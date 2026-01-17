@@ -10,14 +10,17 @@
 
 #include "BluehorseDebugHelper.h"
 
+// Linked Anim Layer の初期化
 void UBluehorseHeroLinkedAnimLayer::NativeInitializeAnimation()
 {
     Super::NativeInitializeAnimation();
 
+    // このレイヤーが紐づく Pawn を HeroCharacter として取得
     OwningHeroCharacter = Cast<ABluehorseHeroCharacter>(TryGetPawnOwner());
 
     if (!OwningHeroCharacter) return;
 
+    // 移動速度制御に必要な MovementComponent をキャッシュ
     if (OwningHeroCharacter)
     {
         MovementComp = OwningHeroCharacter->GetCharacterMovement();
@@ -34,9 +37,11 @@ void UBluehorseHeroLinkedAnimLayer::PreUpdateAnimation(float DeltaSeconds)
     Super::PreUpdateAnimation(DeltaSeconds);
 
     AActor* Owner = GetOwningActor();
+
+    // プレビュー中・初期化前は安全に何もしない
     if (!Owner || !Owner->HasActorBegunPlay() || !MovementComp)
     {
-        return; // プレビュー中や未初期化では処理しない
+        return;
     }
     if (!MovementComp)
     {
@@ -44,6 +49,8 @@ void UBluehorseHeroLinkedAnimLayer::PreUpdateAnimation(float DeltaSeconds)
         return;
     }
 
+    // --- GameplayTag から LocomotionType を決定 --------------------------------
+    // Blocking と TargetLock は同時に成立し得るため、組み合わせ状態を最優先で評価する
     if (UBluehorseFunctionLibrary::NativeDoesActorHaveTag(GetOwningActor(), BluehorseGameplayTags::Player_Status_Blocking) &&
         UBluehorseFunctionLibrary::NativeDoesActorHaveTag(GetOwningActor(), BluehorseGameplayTags::Player_Status_TargetLock))
     {
@@ -67,10 +74,9 @@ void UBluehorseHeroLinkedAnimLayer::PreUpdateAnimation(float DeltaSeconds)
             }
         }
     }
-    
-    // FString DebugMsg = FString::Printf(TEXT("LocomotionType: %s"), *UEnum::GetValueAsString(LocomotionType));
-    // Debug::Print(DebugMsg, FColor::Green, 2);
 
+    // --- LocomotionType に応じて移動速度を同期 ----------------------------------
+    // MaxWalkSpeed をここで更新することで、「ブロッキング中は遅い」などの挙動を即反映する
     switch (LocomotionType)
     {
     case ELocomotionType::Default:
@@ -93,6 +99,7 @@ void UBluehorseHeroLinkedAnimLayer::NativeUpdateAnimation(float DeltaSeconds)
     Super::NativeUpdateAnimation(DeltaSeconds);
 }
 
+// OwningComponent から HeroAnimInstance を取得するヘルパー
 UBluehorseHeroAnimInstance* UBluehorseHeroLinkedAnimLayer::GetHeroAnimInstance() const
 {
     return Cast<UBluehorseHeroAnimInstance>(GetOwningComponent()->GetAnimInstance());
